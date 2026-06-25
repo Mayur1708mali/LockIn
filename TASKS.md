@@ -7,25 +7,26 @@
 ## PHASE 0 — Antigravity CLI Setup
 > Configure tooling before writing any app code.
 
-- [ ] **0.1** Install Antigravity CLI: `curl -fsSL https://antigravity.google/install.sh | bash` then verify with `agy --version`
-- [ ] **0.2** Authenticate: `agy auth login` with your Google account
-- [ ] **0.3** Install Android plugin: open Antigravity → Settings → Customizations → Build With Google Plugins → install Android bundle (installs Android CLI + skills automatically)
-- [ ] **0.4** Verify Android CLI installed: `android --version`
-- [ ] **0.5** Create Android project via Android CLI: `android create --package com.lockin.app --min-sdk 26 --name LockIn`
-- [ ] **0.6** Run `agy inspect` in project root — verify `AGENTS.md` is loaded, skills are detected, no errors
-- [ ] **0.7** Add MCP — Firebase: `/mcp add firebase` inside Antigravity session (for FCM management)
-- [ ] **0.8** Add MCP — GitHub: `/mcp add github` (for version control and PR management)
-- [ ] **0.9** Add MCP — Android CLI MCP: already bundled with Android plugin, verify via `agy inspect`
-- [ ] **0.10** Verify all 3 MCP servers show in `agy inspect` output under "MCP servers connected"
-- [ ] **0.11** Set up GitHub repo, push initial project: `git init && git remote add origin <repo-url> && git push -u origin main`
-- [ ] **0.12** Run first Antigravity agent session: type "Summarize the LockIn project from AGENTS.md" — verify it reads skills correctly
+- [x] **0.1** Install Antigravity CLI: `curl -fsSL https://antigravity.google/install.sh | bash` then verify with `agy --version`
+- [x] **0.2** Authenticate: `agy auth login` with your Google account
+- [x] **0.3** Install Android plugin: open Antigravity → Settings → Customizations → Build With Google Plugins → install Android bundle (installs Android CLI + skills automatically)
+- [x] **0.4** Verify Android CLI installed: `android --version`
+- [x] **0.5** Create Android project via Android CLI: `android create --package com.lockin.app --min-sdk 26 --name LockIn`
+- [x] **0.6** Run `agy inspect` in project root — verify `AGENTS.md` is loaded, skills are detected, no errors
+- [x] **0.7** Add MCP — Firebase: `/mcp add firebase` inside Antigravity session (for FCM management)
+- [x] **0.8** Add MCP — GitHub: `/mcp add github` (for version control and PR management)
+- [x] **0.9** Add MCP — Android CLI MCP: already bundled with Android plugin, verify via `agy inspect`
+- [x] **0.10** Verify all 3 MCP servers show in `agy inspect` output under "MCP servers connected"
+- [x] **0.11** Set up GitHub repo, push initial project: `git init && git remote add origin <repo-url> && git push -u origin main`
+- [x] **0.12** Run first Antigravity agent session: type "Summarize the LockIn project from AGENTS.md" — verify it reads skills correctly
+
 
 ---
 
 ## PHASE 1 — Project Foundation
 > Gradle, dependencies, folder structure, base configuration.
 
-- [ ] **1.1** Set up `build.gradle` (app level) — add all dependencies:
+- [x] **1.1** Set up `build.gradle` (app level) — add all dependencies:
   - Jetpack Compose BOM + Material 3
   - Hilt + KSP
   - Room + KSP
@@ -39,7 +40,7 @@
   - AndroidX Biometric
   - AndroidX Security Crypto
   - Lifecycle (`collectAsStateWithLifecycle`)
-- [ ] **1.2** Set up `build.gradle` (project level) — Hilt classpath, KSP plugin, Google services plugin
+- [x] **1.2** Set up `build.gradle` (project level) — Hilt classpath, KSP plugin, Google services plugin
 - [ ] **1.3** Add build flavors to `build.gradle` — `debug` uses Razorpay test key, `release` uses live key (from `local.properties`)
 - [ ] **1.4** Create Firebase project at `console.firebase.google.com`, add Android app (`com.lockin.app`), download `google-services.json` to `/app`
 - [ ] **1.5** Create full folder structure under `com.lockin.app/` matching AGENTS.md project structure

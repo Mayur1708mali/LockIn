@@ -1,7 +1,10 @@
 plugins {
-  alias(libs.plugins.android.application)
-  alias(libs.plugins.compose.compiler)
-  alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -61,8 +64,10 @@ dependencies {
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
+  
   // Tooling
   debugImplementation(libs.androidx.compose.ui.tooling)
+  
   // Instrumented tests
   androidTestImplementation(libs.androidx.compose.ui.test.junit4)
   debugImplementation(libs.androidx.compose.ui.test.manifest)
@@ -81,5 +86,38 @@ dependencies {
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
-}
 
+  // Hilt DI
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
+
+  // Room Local Database
+  implementation(libs.room.runtime)
+  implementation(libs.room.ktx)
+  ksp(libs.room.compiler)
+
+  // Networking (Retrofit + OkHttp)
+  implementation(libs.retrofit)
+  implementation(libs.retrofit.converter.gson)
+  implementation(libs.okhttp)
+  implementation(libs.okhttp.logging)
+
+  // Timber Logging
+  implementation(libs.timber)
+
+  // RootBeer Root Detection
+  implementation(libs.rootbeer)
+
+  // Razorpay Checkout
+  implementation(libs.razorpay)
+
+  // Firebase BOM + FCM Messaging
+  implementation(platform(libs.firebase.bom))
+  implementation(libs.firebase.messaging)
+
+  // AndroidX Biometrics
+  implementation(libs.androidx.biometric)
+
+  // AndroidX Security Crypto (EncryptedSharedPreferences)
+  implementation(libs.androidx.security.crypto)
+}
