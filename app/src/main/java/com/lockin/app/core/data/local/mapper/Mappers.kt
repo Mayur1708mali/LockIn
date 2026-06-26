@@ -9,6 +9,9 @@ import com.lockin.app.core.domain.model.SessionEvent
 import com.lockin.app.core.domain.model.Wallet
 import com.lockin.app.core.domain.model.WalletTransaction
 
+import com.lockin.app.core.data.local.entity.AllowedAppEntity
+import com.lockin.app.core.domain.model.AllowedApp
+
 /**
  * Maps a SessionEntity (database representation) to a Session (domain representation).
  */
@@ -121,4 +124,22 @@ fun WalletTransaction.toEntity(): WalletTransactionEntity = WalletTransactionEnt
     sessionId = sessionId,
     description = description,
     timestamp = timestamp
+)
+
+/**
+ * Maps an AllowedAppEntity to an AllowedApp domain model.
+ */
+fun AllowedAppEntity.toDomain(): AllowedApp = AllowedApp(
+    packageName = packageName,
+    appName = appName,
+    addedAt = addedAt
+)
+
+/**
+ * Maps an AllowedApp domain model to an AllowedAppEntity database record.
+ */
+fun AllowedApp.toEntity(): AllowedAppEntity = AllowedAppEntity(
+    packageName = packageName,
+    appName = appName,
+    addedAt = addedAt
 )

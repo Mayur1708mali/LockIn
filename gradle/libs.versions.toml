@@ -26,6 +26,8 @@ razorpay = "1.6.38"
 firebaseBom = "33.1.0"
 biometric = "1.2.0-alpha05"
 securityCrypto = "1.1.0-alpha06"
+androidxWork = "2.9.0"
+androidxHilt = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
@@ -67,6 +69,9 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "androidxWork" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

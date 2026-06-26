@@ -242,27 +242,27 @@
 
 ## PHASE 15 — Auto Top-Up Service
 
-- [ ] **15.1** Create `service/AutoTopUpService.kt` — `WorkManager` periodic worker
-- [ ] **15.2** Implement balance check — `availableBalance < threshold` AND `enabled` AND `dailyCount < 3` AND no active session
-- [ ] **15.3** Implement daily cap reset — compare `lastTopUpDate` to today, reset `dailyTopUpCount` at midnight
-- [ ] **15.4** Implement silent charge → `DepositToWalletUseCase` with type `AUTO_TOPUP` on success
-- [ ] **15.5** On success → notification "Wallet topped up · ₹200 added automatically"
-- [ ] **15.6** On failure → notification "Auto top-up failed. Add money manually." + temporarily disable auto top-up
-- [ ] **15.7** On daily cap → notification "Daily top-up limit reached."
-- [ ] **15.8** Gate: never trigger during active session — check session state first
-- [ ] **15.9** Enqueue worker in `LockInApp.kt` with 30-minute periodic interval
+- [x] **15.1** Create `service/AutoTopUpService.kt` — `WorkManager` periodic worker
+- [x] **15.2** Implement balance check — `availableBalance < threshold` AND `enabled` AND `dailyCount < 3` AND no active session
+- [x] **15.3** Implement daily cap reset — compare `lastTopUpDate` to today, reset `dailyTopUpCount` at midnight
+- [x] **15.4** Implement silent charge → `DepositToWalletUseCase` with type `AUTO_TOPUP` on success
+- [x] **15.5** On success → notification "Wallet topped up · ₹200 added automatically"
+- [x] **15.6** On failure → notification "Auto top-up failed. Add money manually." + temporarily disable auto top-up
+- [x] **15.7** On daily cap → notification "Daily top-up limit reached."
+- [x] **15.8** Gate: never trigger during active session — check session state first
+- [x] **15.9** Enqueue worker in `LockInApp.kt` with 30-minute periodic interval
 
 ---
 
 ## PHASE 16 — Settings Screen
 
-- [ ] **16.1** Create `SettingsViewModel.kt` — allowlist state, auto top-up config, payment method label
-- [ ] **16.2** Create `SettingsScreen.kt` — sections: Allowlist, Auto Top-Up, Payment Method, Account
-- [ ] **16.3** Build `AllowlistSection.kt` — default apps (non-removable), user apps (removable), "Add App" (locked during session)
-- [ ] **16.4** Build `AddAppSheet.kt` — searchable installed app list, max 3 custom, counter "1/3"
-- [ ] **16.5** Build `AutoTopUpSection.kt` — toggle, threshold picker, amount picker, saved method display
-- [ ] **16.6** Build `PaymentMethodSection.kt` — saved method label, "Change Method" button
-- [ ] **16.7** Lock all settings during active session — global amber banner "Settings locked during active session"
+- [x] **16.1** Create `SettingsViewModel.kt` — allowlist state, auto top-up config, payment method label
+- [x] **16.2** Create `SettingsScreen.kt` — sections: Allowlist, Auto Top-Up, Payment Method, Account
+- [x] **16.3** Build `AllowlistSection.kt` — default apps (non-removable), user apps (removable), "Add App" (locked during session)
+- [x] **16.4** Build `AddAppSheet.kt` — searchable installed app list, max 3 custom, counter "1/3"
+- [x] **16.5** Build `AutoTopUpSection.kt` — toggle, threshold picker, amount picker, saved method display
+- [x] **16.6** Build `PaymentMethodSection.kt` — saved method label, "Change Method" button
+- [x] **16.7** Lock all settings during active session — global amber banner "Settings locked during active session"
 
 ---
 

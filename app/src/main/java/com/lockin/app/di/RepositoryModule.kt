@@ -2,8 +2,10 @@ package com.lockin.app.di
 
 import com.lockin.app.core.data.repository.SessionRepositoryImpl
 import com.lockin.app.core.data.repository.WalletRepositoryImpl
+import com.lockin.app.core.data.repository.AllowedAppRepositoryImpl
 import com.lockin.app.core.domain.repository.SessionRepository
 import com.lockin.app.core.domain.repository.WalletRepository
+import com.lockin.app.core.domain.repository.AllowedAppRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -35,4 +37,13 @@ abstract class RepositoryModule {
     abstract fun bindWalletRepository(
         impl: WalletRepositoryImpl
     ): WalletRepository
+
+    /**
+     * Binds the AllowedAppRepository interface to the AllowedAppRepositoryImpl concrete class.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindAllowedAppRepository(
+        impl: AllowedAppRepositoryImpl
+    ): AllowedAppRepository
 }

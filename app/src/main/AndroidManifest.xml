@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions required by the app -->
     <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
@@ -50,10 +51,17 @@
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false" />
 
-        <!-- Auto Top-Up Service (background worker/service) -->
-        <service
-            android:name=".service.AutoTopUpService"
-            android:exported="false" />
+        <!-- Disable default WorkManager initializer so Hilt can configure it -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
 
         <!-- Boot Receiver to restart VPN on device reboot -->
         <receiver
