@@ -268,12 +268,12 @@
 
 ## PHASE 17 — Session History Screen
 
-- [ ] **17.1** Create `HistoryViewModel.kt` — session history Flow, summary stats
-- [ ] **17.2** Create `HistoryScreen.kt` — stats card at top, session list below
-- [ ] **17.3** Build `HistorySummaryCard.kt` — total sessions, completion rate %, longest streak, total time locked in
-- [ ] **17.4** Build `SessionHistoryList.kt` — grouped by week, row: date/time, duration, status badge (green/red), penalty
-- [ ] **17.5** Build `SessionDetailSheet.kt` — full event timeline on row tap (HEARTBEAT, VPN_GAP, BREAK_ATTEMPT with timestamps)
-- [ ] **17.6** Empty state: "No sessions yet. Start your first LockIn." with Home CTA
+- [x] **17.1** Create `HistoryViewModel.kt` — session history Flow, summary stats
+- [x] **17.2** Create `HistoryScreen.kt` — stats card at top, session list below
+- [x] **17.3** Build `HistorySummaryCard.kt` — total sessions, completion rate %, longest streak, total time locked in
+- [x] **17.4** Build `SessionHistoryList.kt` — grouped by week, row: date/time, duration, status badge (green/red), penalty
+- [x] **17.5** Build `SessionDetailSheet.kt` — full event timeline on row tap (HEARTBEAT, VPN_GAP, BREAK_ATTEMPT with timestamps)
+- [x] **17.6** Empty state: "No sessions yet. Start your first LockIn." with Home CTA
 
 ---
 

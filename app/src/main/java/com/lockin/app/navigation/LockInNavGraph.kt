@@ -25,6 +25,7 @@ import com.lockin.app.feature.session.BreakGateScreen
 import com.lockin.app.feature.session.SessionCompleteScreen
 import com.lockin.app.feature.wallet.WalletScreen
 import com.lockin.app.feature.settings.SettingsScreen
+import com.lockin.app.feature.history.HistoryScreen
 import timber.log.Timber
 
 /**
@@ -145,7 +146,11 @@ fun LockInNavGraph(
                 )
             }
             entry<LockInRoute.History> {
-                PlaceholderScreen("Session History\n(Phase 17)")
+                HistoryScreen(
+                    onNavigateBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<LockInRoute.Settings> {
                 SettingsScreen(
