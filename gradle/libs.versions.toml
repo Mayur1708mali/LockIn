@@ -17,7 +17,7 @@ lifecycleViewmodelNav3 = "2.10.0"
 # Dependencies versions
 hilt = "2.59.2"
 ksp = "2.3.9"
-room = "2.6.1"
+room = "2.7.0-alpha07"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 timber = "5.0.1"

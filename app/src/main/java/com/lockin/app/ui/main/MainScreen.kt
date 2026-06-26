@@ -10,7 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.lockin.app.data.DefaultDataRepository
-import com.lockin.app.theme.LockInTheme
+import com.lockin.app.ui.theme.LockInTheme
 
 @Composable
 fun MainScreen(

@@ -41,154 +41,154 @@
   - AndroidX Security Crypto
   - Lifecycle (`collectAsStateWithLifecycle`)
 - [x] **1.2** Set up `build.gradle` (project level) — Hilt classpath, KSP plugin, Google services plugin
-- [ ] **1.3** Add build flavors to `build.gradle` — `debug` uses Razorpay test key, `release` uses live key (from `local.properties`)
-- [ ] **1.4** Create Firebase project at `console.firebase.google.com`, add Android app (`com.lockin.app`), download `google-services.json` to `/app`
-- [ ] **1.5** Create full folder structure under `com.lockin.app/` matching AGENTS.md project structure
-- [ ] **1.6** Create `LockInApp.kt` — Application class with `@HiltAndroidApp`, Timber init (debug only), root detection call on launch
-- [ ] **1.7** Add all permissions to `AndroidManifest.xml`
-- [ ] **1.8** Register `LockInVpnService` in `AndroidManifest.xml` with VPN intent filter and foreground service type
-- [ ] **1.9** Register `AutoTopUpService`, `SessionWatchdog`, and `BootReceiver` in `AndroidManifest.xml`
-- [ ] **1.10** Add `local.properties` entries for `RAZORPAY_KEY_TEST` and `RAZORPAY_KEY_LIVE` — add `local.properties` to `.gitignore`
+- [x] **1.3** Add build flavors to `build.gradle` — `debug` uses Razorpay test key, `release` uses live key (from `local.properties`)
+- [x] **1.4** Create Firebase project at `console.firebase.google.com`, add Android app (`com.lockin.app`), download `google-services.json` to `/app`
+- [x] **1.5** Create full folder structure under `com.lockin.app/` matching AGENTS.md project structure
+- [x] **1.6** Create `LockInApp.kt` — Application class with `@HiltAndroidApp`, Timber init (debug only), root detection call on launch
+- [x] **1.7** Add all permissions to `AndroidManifest.xml`
+- [x] **1.8** Register `LockInVpnService` in `AndroidManifest.xml` with VPN intent filter and foreground service type
+- [x] **1.9** Register `AutoTopUpService`, `SessionWatchdog`, and `BootReceiver` in `AndroidManifest.xml`
+- [x] **1.10** Add `local.properties` entries for `RAZORPAY_KEY_TEST` and `RAZORPAY_KEY_LIVE` — add `local.properties` to `.gitignore`
 
 ---
 
 ## PHASE 2 — Design System
 > Visual foundation. Every screen uses these tokens. Build before any UI screens.
 
-- [ ] **2.1** Create `ui/theme/Color.kt` — all color tokens from AGENTS.md design system
-- [ ] **2.2** Create `ui/theme/Type.kt` — typography scale, monospace font for `LabelSmall`
-- [ ] **2.3** Create `ui/theme/Shape.kt` — 4dp buttons, 8dp cards, 0dp bottom sheets
-- [ ] **2.4** Create `ui/theme/Theme.kt` — `LockInTheme` composable, dark mode only, applies color/type/shape
-- [ ] **2.5** Create `ui/components/LockInButton.kt` — full-width, 4dp radius, uppercase, primary (red fill) + secondary (outline) variants
-- [ ] **2.6** Create `ui/components/LockInTextField.kt` — dark-styled text input used for BREAK confirmation
-- [ ] **2.7** Create `ui/components/WalletBadge.kt` — compact balance display, optional "· Auto" suffix when auto top-up is on
-- [ ] **2.8** Create `ui/components/SectionHeader.kt` — monospace label + bold title, used across all screens
-- [ ] **2.9** Create `ui/components/EmptyState.kt` — icon + message + CTA button
-- [ ] **2.10** Create `ui/components/LoadingOverlay.kt` — full-screen loading with minimal spinner
+- [x] **2.1** Create `ui/theme/Color.kt` — all color tokens from AGENTS.md design system
+- [x] **2.2** Create `ui/theme/Type.kt` — typography scale, monospace font for `LabelSmall`
+- [x] **2.3** Create `ui/theme/Shape.kt` — 4dp buttons, 8dp cards, 0dp bottom sheets
+- [x] **2.4** Create `ui/theme/Theme.kt` — `LockInTheme` composable, dark mode only, applies color/type/shape
+- [x] **2.5** Create `ui/components/LockInButton.kt` — full-width, 4dp radius, uppercase, primary (red fill) + secondary (outline) variants
+- [x] **2.6** Create `ui/components/LockInTextField.kt` — dark-styled text input used for BREAK confirmation
+- [x] **2.7** Create `ui/components/WalletBadge.kt` — compact balance display, optional "· Auto" suffix when auto top-up is on
+- [x] **2.8** Create `ui/components/SectionHeader.kt` — monospace label + bold title, used across all screens
+- [x] **2.9** Create `ui/components/EmptyState.kt` — icon + message + CTA button
+- [x] **2.10** Create `ui/components/LoadingOverlay.kt` — full-screen loading with minimal spinner
 
 ---
 
 ## PHASE 3 — Data Layer
 > Room DB, entities, DAOs, repositories. No UI yet.
 
-- [ ] **3.1** Create `core/data/local/entity/SessionEntity.kt`
-- [ ] **3.2** Create `core/data/local/entity/SessionEventEntity.kt`
-- [ ] **3.3** Create `core/data/local/entity/WalletEntity.kt` — include `autoTopUpEnabled`, threshold, amount fields
-- [ ] **3.4** Create `core/data/local/entity/WalletTransactionEntity.kt`
-- [ ] **3.5** Create `core/data/local/converter/TypeConverters.kt` — `SessionStatus` and `TransactionType` enums
-- [ ] **3.6** Create `core/data/local/dao/SessionDao.kt` — insert, update, getById, getAll, getActive (returns `Flow`)
-- [ ] **3.7** Create `core/data/local/dao/SessionEventDao.kt` — insert (append-only), getBySessionId
-- [ ] **3.8** Create `core/data/local/dao/WalletDao.kt` — getWallet, updateAvailableBalance, updateHeldBalance
-- [ ] **3.9** Create `core/data/local/dao/WalletTransactionDao.kt` — insert, getAll as `Flow`, getBySessionId
-- [ ] **3.10** Create `core/data/local/LockInDatabase.kt` — Room DB, all entities registered, version 1
-- [ ] **3.11** Create `core/domain/model/` — pure Kotlin domain models: `Session`, `SessionEvent`, `Wallet`, `WalletTransaction`, `AutoTopUpConfig`
-- [ ] **3.12** Create `core/domain/model/SessionStatus.kt` enum and `TransactionType.kt` enum
-- [ ] **3.13** Create mapper extension functions: `SessionEntity.toDomain()`, `Session.toEntity()` (and same for all entities)
-- [ ] **3.14** Create `core/domain/repository/SessionRepository.kt` interface
-- [ ] **3.15** Create `core/domain/repository/WalletRepository.kt` interface
-- [ ] **3.16** Create `core/data/repository/SessionRepositoryImpl.kt`
-- [ ] **3.17** Create `core/data/repository/WalletRepositoryImpl.kt`
-- [ ] **3.18** Create `di/DatabaseModule.kt` — Hilt module providing Room DB, all DAOs
-- [ ] **3.19** Create `di/RepositoryModule.kt` — Hilt module binding interfaces to implementations
+- [x] **3.1** Create `core/data/local/entity/SessionEntity.kt`
+- [x] **3.2** Create `core/data/local/entity/SessionEventEntity.kt`
+- [x] **3.3** Create `core/data/local/entity/WalletEntity.kt` — include `autoTopUpEnabled`, threshold, amount fields
+- [x] **3.4** Create `core/data/local/entity/WalletTransactionEntity.kt`
+- [x] **3.5** Create `core/data/local/converter/TypeConverters.kt` — `SessionStatus` and `TransactionType` enums
+- [x] **3.6** Create `core/data/local/dao/SessionDao.kt` — insert, update, getById, getAll, getActive (returns `Flow`)
+- [x] **3.7** Create `core/data/local/dao/SessionEventDao.kt` — insert (append-only), getBySessionId
+- [x] **3.8** Create `core/data/local/dao/WalletDao.kt` — getWallet, updateAvailableBalance, updateHeldBalance
+- [x] **3.9** Create `core/data/local/dao/WalletTransactionDao.kt` — insert, getAll as `Flow`, getBySessionId
+- [x] **3.10** Create `core/data/local/LockInDatabase.kt` — Room DB, all entities registered, version 1
+- [x] **3.11** Create `core/domain/model/` — pure Kotlin domain models: `Session`, `SessionEvent`, `Wallet`, `WalletTransaction`, `AutoTopUpConfig`
+- [x] **3.12** Create `core/domain/model/SessionStatus.kt` enum and `TransactionType.kt` enum
+- [x] **3.13** Create mapper extension functions: `SessionEntity.toDomain()`, `Session.toEntity()` (and same for all entities)
+- [x] **3.14** Create `core/domain/repository/SessionRepository.kt` interface
+- [x] **3.15** Create `core/domain/repository/WalletRepository.kt` interface
+- [x] **3.16** Create `core/data/repository/SessionRepositoryImpl.kt`
+- [x] **3.17** Create `core/data/repository/WalletRepositoryImpl.kt`
+- [x] **3.18** Create `di/DatabaseModule.kt` — Hilt module providing Room DB, all DAOs
+- [x] **3.19** Create `di/RepositoryModule.kt` — Hilt module binding interfaces to implementations
 
 ---
 
 ## PHASE 4 — Domain Layer (Use Cases)
 
-- [ ] **4.1** Create `StartSessionUseCase.kt` — validate `availableBalance ≥ penalty`, move funds to held, create session
-- [ ] **4.2** Create `CompleteSessionUseCase.kt` — move held → available, update status COMPLETED, increment streak
-- [ ] **4.3** Create `BreakSessionUseCase.kt` — deduct held as penalty, update status BROKEN, reset streak
-- [ ] **4.4** Create `GetActiveSessionUseCase.kt` — return active session or null
-- [ ] **4.5** Create `GetWalletUseCase.kt` — return wallet as `Flow<Wallet>`
-- [ ] **4.6** Create `DepositToWalletUseCase.kt` — add funds after Razorpay success, log `DEPOSIT` transaction
-- [ ] **4.7** Create `WithdrawFromWalletUseCase.kt` — validate `availableBalance ≥ 5000 paise`, initiate withdrawal, log `WITHDRAWAL`
-- [ ] **4.8** Create `AutoTopUpUseCase.kt` — check balance < threshold, check daily cap < 3, charge token, log `AUTO_TOPUP`
-- [ ] **4.9** Create `LogSessionEventUseCase.kt` — append event to audit log (HEARTBEAT, VPN_GAP, etc.)
-- [ ] **4.10** Create `GetSessionHistoryUseCase.kt` — return all sessions ordered by date
-- [ ] **4.11** Create `GetTransactionHistoryUseCase.kt` — return wallet transactions as `Flow`
-- [ ] **4.12** Create `GetStreakUseCase.kt` — compute current streak from session history
-- [ ] **4.13** Create `SaveAutoTopUpConfigUseCase.kt` — persist Razorpay token + config to `EncryptedSharedPreferences`
-- [ ] **4.14** Create `GetAutoTopUpConfigUseCase.kt` — read config from `EncryptedSharedPreferences`
+- [x] **4.1** Create `StartSessionUseCase.kt` — validate `availableBalance ≥ penalty`, move funds to held, create session
+- [x] **4.2** Create `CompleteSessionUseCase.kt` — move held → available, update status COMPLETED, increment streak
+- [x] **4.3** Create `BreakSessionUseCase.kt` — deduct held as penalty, update status BROKEN, reset streak
+- [x] **4.4** Create `GetActiveSessionUseCase.kt` — return active session or null
+- [x] **4.5** Create `GetWalletUseCase.kt` — return wallet as `Flow<Wallet>`
+- [x] **4.6** Create `DepositToWalletUseCase.kt` — add funds after Razorpay success, log `DEPOSIT` transaction
+- [x] **4.7** Create `WithdrawFromWalletUseCase.kt` — validate `availableBalance ≥ 5000 paise`, initiate withdrawal, log `WITHDRAWAL`
+- [x] **4.8** Create `AutoTopUpUseCase.kt` — check balance < threshold, check daily cap < 3, charge token, log `AUTO_TOPUP`
+- [x] **4.9** Create `LogSessionEventUseCase.kt` — append event to audit log (HEARTBEAT, VPN_GAP, etc.)
+- [x] **4.10** Create `GetSessionHistoryUseCase.kt` — return all sessions ordered by date
+- [x] **4.11** Create `GetTransactionHistoryUseCase.kt` — return wallet transactions as `Flow`
+- [x] **4.12** Create `GetStreakUseCase.kt` — compute current streak from session history
+- [x] **4.13** Create `SaveAutoTopUpConfigUseCase.kt` — persist Razorpay token + config to `EncryptedSharedPreferences`
+- [x] **4.14** Create `GetAutoTopUpConfigUseCase.kt` — read config from `EncryptedSharedPreferences`
 
 ---
 
 ## PHASE 5 — Security Layer
 
-- [ ] **5.1** Create `core/security/EncryptedPrefsManager.kt` — wrapper for `EncryptedSharedPreferences`, methods: `saveToken()`, `getToken()`, `saveUserId()`, `getUserId()`, `saveAutoTopUpConfig()`, `getAutoTopUpConfig()`
-- [ ] **5.2** Create `core/security/BiometricHelper.kt` — wraps `BiometricPrompt`, returns `Flow<BiometricResult>` (Success / Failure / Error)
-- [ ] **5.3** Create `core/security/RootDetectionManager.kt` — wraps RootBeer, returns `RootStatus` enum
-- [ ] **5.4** Integrate root detection in `LockInApp.kt` — store result in `EncryptedPrefsManager`, surface warning on home screen
-- [ ] **5.5** Create `di/SecurityModule.kt` — Hilt module providing `EncryptedPrefsManager` and `BiometricHelper`
+- [x] **5.1** Create `core/security/EncryptedPrefsManager.kt` — wrapper for `EncryptedSharedPreferences`, methods: `saveToken()`, `getToken()`, `saveUserId()`, `getUserId()`, `saveAutoTopUpConfig()`, `getAutoTopUpConfig()`
+- [x] **5.2** Create `core/security/BiometricHelper.kt` — wraps `BiometricPrompt`, returns `Flow<BiometricResult>` (Success / Failure / Error)
+- [x] **5.3** Create `core/security/RootDetectionManager.kt` — wraps RootBeer, returns `RootStatus` enum
+- [x] **5.4** Integrate root detection in `LockInApp.kt` — store result in `EncryptedPrefsManager`, surface warning on home screen
+- [x] **5.5** Create `di/SecurityModule.kt` — Hilt module providing `EncryptedPrefsManager` and `BiometricHelper`
 
 ---
 
 ## PHASE 6 — Navigation
 
-- [ ] **6.1** Create `navigation/Routes.kt` — sealed class with all route constants: `Onboarding`, `Home`, `ActiveSession`, `BreakGate`, `SessionComplete`, `Wallet`, `History`, `Settings`
-- [ ] **6.2** Create `navigation/LockInNavGraph.kt` — `NavHost` with all composable destinations
-- [ ] **6.3** Add launch logic — if no wallet balance → Onboarding; if active session exists → ActiveSession; else → Home
-- [ ] **6.4** Create `navigation/BottomNavBar.kt` — 3 tabs: Home, History, Wallet
-- [ ] **6.5** Disable back navigation during active session and break gate — intercept with `BackHandler`
+- [x] **6.1** Create `navigation/Routes.kt` — sealed class with all route constants: `Onboarding`, `Home`, `ActiveSession`, `BreakGate`, `SessionComplete`, `Wallet`, `History`, `Settings`
+- [x] **6.2** Create `navigation/LockInNavGraph.kt` — `NavHost` with all composable destinations
+- [x] **6.3** Add launch logic — if no wallet balance → Onboarding; if active session exists → ActiveSession; else → Home
+- [x] **6.4** Create `navigation/BottomNavBar.kt` — 3 tabs: Home, History, Wallet
+- [x] **6.5** Disable back navigation during active session and break gate — intercept with `BackHandler`
 
 ---
 
 ## PHASE 7 — Onboarding Screens
 
-- [ ] **7.1** Create `OnboardingViewModel.kt` — tracks step (1–7), VPN permission state, deposit state, auto top-up config
-- [ ] **7.2** Create `OnboardingScreen.kt` — step container with dot progress indicator, animated transitions between steps
-- [ ] **7.3** Build **Step 1** — Concept: "Lock your internet. Put money on the line. Break early, you pay." Full-screen, single CTA
-- [ ] **7.4** Build **Step 2** — Wallet explainer: how deposits, sessions, and withdrawals work
-- [ ] **7.5** Build **Step 3** — VPN permission: explain local-only, no data leaves device, handle `VpnService.prepare()` result
-- [ ] **7.6** Build **Step 4** — Notification permission: `POST_NOTIFICATIONS` request, soft skip allowed
-- [ ] **7.7** Build **Step 5** — First deposit: Razorpay checkout, preset amounts (₹100/₹200/₹500), cannot proceed with ₹0, save payment token on success
-- [ ] **7.8** Build **Step 6** — Auto Top-Up setup: toggle (ON by default), threshold picker, amount picker, pre-filled payment method from Step 5
-- [ ] **7.9** Build **Step 7** — Ready: show wallet balance, "Start Your First Session" → navigate to Home
-- [ ] **7.10** Persist onboarding completion in `EncryptedPrefsManager` — never show again once complete
+- [x] **7.1** Create `OnboardingViewModel.kt` — tracks step (1–7), VPN permission state, deposit state, auto top-up config
+- [x] **7.2** Create `OnboardingScreen.kt` — step container with dot progress indicator, animated transitions between steps
+- [x] **7.3** Build **Step 1** — Concept: "Lock your internet. Put money on the line. Break early, you pay." Full-screen, single CTA
+- [x] **7.4** Build **Step 2** — Wallet explainer: how deposits, sessions, and withdrawals work
+- [x] **7.5** Build **Step 3** — VPN permission: explain local-only, no data leaves device, handle `VpnService.prepare()` result
+- [x] **7.6** Build **Step 4** — Notification permission: `POST_NOTIFICATIONS` request, soft skip allowed
+- [x] **7.7** Build **Step 5** — First deposit: Razorpay checkout, preset amounts (₹100/₹200/₹500), cannot proceed with ₹0, save payment token on success
+- [x] **7.8** Build **Step 6** — Auto Top-Up setup: toggle (ON by default), threshold picker, amount picker, pre-filled payment method from Step 5
+- [x] **7.9** Build **Step 7** — Ready: show wallet balance, "Start Your First Session" → navigate to Home
+- [x] **7.10** Persist onboarding completion in `EncryptedPrefsManager` — never show again once complete
 
 ---
 
 ## PHASE 8 — Home Screen
 
-- [ ] **8.1** Create `HomeViewModel.kt` — exposes wallet `Flow`, streak count, auto top-up status, session config state
-- [ ] **8.2** Create `HomeScreen.kt` — wallet badge top, duration picker, penalty picker, allowlist preview row, Lock In button, streak card
-- [ ] **8.3** Build `DurationPicker.kt` — horizontal scrollable preset chips (30m/1h/2h/4h/8h) + custom time input dialog
-- [ ] **8.4** Build `PenaltyPicker.kt` — preset chips (₹50/₹100/₹200/₹500) + custom input, cap at wallet balance
-- [ ] **8.5** Build `AllowlistPreviewRow.kt` — top 3 app icons + count, tappable → Settings
-- [ ] **8.6** Build `StreakCard.kt` — streak number, label, 7-day bar (filled = completed, empty = broken/missed)
-- [ ] **8.7** Handle insufficient balance + Auto Top-Up OFF → inline warning + "Add Money" shortcut
-- [ ] **8.8** Handle insufficient balance + Auto Top-Up ON → show "Topping up…" state → proceed on success
-- [ ] **8.9** Show amber root-detection banner if rooted (non-blocking)
-- [ ] **8.10** Wire "Lock In" button → `StartSessionUseCase` → on success navigate to `ActiveSession`
+- [x] **8.1** Create `HomeViewModel.kt` — exposes wallet `Flow`, streak count, auto top-up status, session config state
+- [x] **8.2** Create `HomeScreen.kt` — wallet badge top, duration picker, penalty picker, allowlist preview row, Lock In button, streak card
+- [x] **8.3** Build `DurationPicker.kt` — horizontal scrollable preset chips (30m/1h/2h/4h/8h) + custom time input dialog
+- [x] **8.4** Build `PenaltyPicker.kt` — preset chips (₹50/₹100/₹200/₹500) + custom input, cap at wallet balance
+- [x] **8.5** Build `AllowlistPreviewRow.kt` — top 3 app icons + count, tappable → Settings
+- [x] **8.6** Build `StreakCard.kt` — streak number, label, 7-day bar (filled = completed, empty = broken/missed)
+- [x] **8.7** Handle insufficient balance + Auto Top-Up OFF → inline warning + "Add Money" shortcut
+- [x] **8.8** Handle insufficient balance + Auto Top-Up ON → show "Topping up…" state → proceed on success
+- [x] **8.9** Show amber root-detection banner if rooted (non-blocking)
+- [x] **8.10** Wire "Lock In" button → `StartSessionUseCase` → on success navigate to `ActiveSession`
 
 ---
 
 ## PHASE 9 — VPN Service
 
-- [ ] **9.1** Create `service/LockInVpnService.kt` — extends `VpnService`, foreground service, notification channel setup
-- [ ] **9.2** Implement VPN builder — `addAddress`, `addRoute` (IPv4 + IPv6), `addDnsServer`, `setBlocking(true)`
-- [ ] **9.3** Implement `addDisallowedApplication()` loop with try/catch per package (skip missing packages)
-- [ ] **9.4** Implement `establish()` with try/catch, store `ParcelFileDescriptor`
-- [ ] **9.5** Implement foreground notification — persistent, shows countdown "LockIn active · 1h 23m remaining", accent red
-- [ ] **9.6** Implement clean VPN stop — close `ParcelFileDescriptor`, stop foreground
-- [ ] **9.7** Create `service/AllowlistManager.kt` — merges default allowlist + user additions from Room
-- [ ] **9.8** Create `service/SessionWatchdog.kt` — `JobService`, checks VPN alive every 30s, restarts if dead, logs events
-- [ ] **9.9** Implement heartbeat emission — log `HEARTBEAT` event every 30s during active session
-- [ ] **9.10** Create `BootReceiver.kt` — `BroadcastReceiver`, restarts watchdog after device reboot if session was active
+- [x] **9.1** Create `service/LockInVpnService.kt` — extends `VpnService`, foreground service, notification channel setup
+- [x] **9.2** Implement VPN builder — `addAddress`, `addRoute` (IPv4 + IPv6), `addDnsServer`, `setBlocking(true)`
+- [x] **9.3** Implement `addDisallowedApplication()` loop with try/catch per package (skip missing packages)
+- [x] **9.4** Implement `establish()` with try/catch, store `ParcelFileDescriptor`
+- [x] **9.5** Implement foreground notification — persistent, shows countdown "LockIn active · 1h 23m remaining", accent red
+- [x] **9.6** Implement clean VPN stop — close `ParcelFileDescriptor`, stop foreground
+- [x] **9.7** Create `service/AllowlistManager.kt` — merges default allowlist + user additions from Room
+- [x] **9.8** Create `service/SessionWatchdog.kt` — `JobService`, checks VPN alive every 30s, restarts if dead, logs events
+- [x] **9.9** Implement heartbeat emission — log `HEARTBEAT` event every 30s during active session
+- [x] **9.10** Create `BootReceiver.kt` — `BroadcastReceiver`, restarts watchdog after device reboot if session was active
 - [ ] **9.11** Manual test: VPN on → Chrome blocked, GPay works. Force-kill service → auto-restart within 5s.
 
 ---
 
 ## PHASE 10 — Active Session Screen
 
-- [ ] **10.1** Create `SessionViewModel.kt` — countdown `StateFlow<Long>` (remaining ms), session state, penalty amount
-- [ ] **10.2** Implement coroutine countdown timer — ticks every second, triggers `CompleteSessionUseCase` at 0
-- [ ] **10.3** Create `ActiveSessionScreen.kt` — full-screen, large countdown center, penalty label below, "End Early" button pushed below fold
-- [ ] **10.4** Build `CountdownTimer.kt` — `DisplayLarge` monospace text `HH:MM:SS`, subtle pulse in last 60 seconds
-- [ ] **10.5** Push "End Early" below fold using `Spacer` in `LazyColumn`
-- [ ] **10.6** On timer = 0 → `CompleteSessionUseCase` → stop VPN → navigate to `SessionComplete`
-- [ ] **10.7** Handle foreground return mid-session — reattach to VPN service, resume countdown from correct remaining time
-- [ ] **10.8** Keep screen awake during session — `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON`
-- [ ] **10.9** Intercept back press during session — show "You're locked in" snackbar, do not navigate back
+- [x] **10.1** Create `SessionViewModel.kt` — countdown `StateFlow<Long>` (remaining ms), session state, penalty amount
+- [x] **10.2** Implement coroutine countdown timer — ticks every second, triggers `CompleteSessionUseCase` at 0
+- [x] **10.3** Create `ActiveSessionScreen.kt` — full-screen, large countdown center, penalty label below, "End Early" button pushed below fold
+- [x] **10.4** Build `CountdownTimer.kt` — `DisplayLarge` monospace text `HH:MM:SS`, subtle pulse in last 60 seconds
+- [x] **10.5** Push "End Early" below fold using `Spacer` in `LazyColumn`
+- [x] **10.6** On timer = 0 → `CompleteSessionUseCase` → stop VPN → navigate to `SessionComplete`
+- [x] **10.7** Handle foreground return mid-session — reattach to VPN service, resume countdown from correct remaining time
+- [x] **10.8** Keep screen awake during session — `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON`
+- [x] **10.9** Intercept back press during session — show "You're locked in" snackbar, do not navigate back
 
 ---
 
@@ -206,12 +206,12 @@
 
 ## PHASE 12 — Session Completion Screen
 
-- [ ] **12.1** Create `SessionCompleteViewModel.kt` — receives `SessionStatus`, fetches updated wallet balance
-- [ ] **12.2** Create `SessionCompleteScreen.kt` — two layouts: COMPLETED and BROKEN
-- [ ] **12.3** Build **COMPLETED state**: subtle confetti, "₹200 back in your wallet" (green), streak update, "Lock In Again" + "Withdraw to Bank" buttons
-- [ ] **12.4** Build **BROKEN state**: "Session Ended Early" (amber), "₹200 penalty charged" (red), remaining balance, "Try Again" button
-- [ ] **12.5** "Lock In Again" → Home, pre-fill same duration and penalty
-- [ ] **12.6** "Withdraw to Bank" → Wallet screen, open withdrawal sheet automatically
+- [x] **12.1** Create `SessionCompleteViewModel.kt` — receives `SessionStatus`, fetches updated wallet balance
+- [x] **12.2** Create `SessionCompleteScreen.kt` — two layouts: COMPLETED and BROKEN
+- [x] **12.3** Build **COMPLETED state**: subtle confetti, "₹200 back in your wallet" (green), streak update, "Lock In Again" + "Withdraw to Bank" buttons
+- [x] **12.4** Build **BROKEN state**: "Session Ended Early" (amber), "₹200 penalty charged" (red), remaining balance, "Try Again" button
+- [x] **12.5** "Lock In Again" → Home, pre-fill same duration and penalty
+- [x] **12.6** "Withdraw to Bank" → Wallet screen, open withdrawal sheet automatically
 
 ---
 

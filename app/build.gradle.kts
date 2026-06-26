@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
@@ -6,6 +9,14 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
 }
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    FileInputStream(localPropertiesFile).use { localProperties.load(it) }
+}
+val razorpayKeyTest = localProperties.getProperty("RAZORPAY_KEY_TEST") ?: "rzp_test_placeholder"
+val razorpayKeyLive = localProperties.getProperty("RAZORPAY_KEY_LIVE") ?: "rzp_live_placeholder"
 
 android {
     namespace = "com.lockin.app"
@@ -19,9 +30,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "RAZORPAY_KEY_ID", "\"$razorpayKeyTest\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            buildConfigField("String", "RAZORPAY_KEY_ID", "\"$razorpayKeyLive\"")
         }
     }
     compileOptions {
@@ -31,7 +46,7 @@ android {
     buildFeatures {
       compose = true
       aidl = false
-      buildConfig = false
+      buildConfig = true
       shaders = false
     }
 
