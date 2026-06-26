@@ -23,6 +23,7 @@ import com.lockin.app.feature.onboarding.OnboardingScreen
 import com.lockin.app.feature.session.ActiveSessionScreen
 import com.lockin.app.feature.session.BreakGateScreen
 import com.lockin.app.feature.session.SessionCompleteScreen
+import com.lockin.app.feature.wallet.WalletScreen
 import timber.log.Timber
 
 /**
@@ -131,9 +132,15 @@ fun LockInNavGraph(
                 )
             }
             entry<LockInRoute.Wallet> { route ->
-                PlaceholderScreen(
-                    "Wallet Screen\n(Phase 13)\n\n" +
-                    "Withdrawal Sheet Auto-Open: ${route.openWithdrawalSheet}"
+                WalletScreen(
+                    openWithdrawalSheet = route.openWithdrawalSheet,
+                    onNavigateBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onNavigateHome = {
+                        backStack.clear()
+                        backStack.add(LockInRoute.Home)
+                    }
                 )
             }
             entry<LockInRoute.History> {

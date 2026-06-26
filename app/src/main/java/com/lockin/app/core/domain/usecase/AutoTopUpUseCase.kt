@@ -1,8 +1,10 @@
 package com.lockin.app.core.domain.usecase
 
+import com.lockin.app.core.data.payment.RazorpayManager
 import com.lockin.app.core.domain.model.TransactionType
 import com.lockin.app.core.domain.repository.SessionRepository
 import com.lockin.app.core.domain.repository.WalletRepository
+import com.lockin.app.core.security.EncryptedPrefsManager
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
@@ -15,7 +17,9 @@ import timber.log.Timber
 class AutoTopUpUseCase @Inject constructor(
     private val walletRepository: WalletRepository,
     private val sessionRepository: SessionRepository,
-    private val depositToWalletUseCase: DepositToWalletUseCase
+    private val depositToWalletUseCase: DepositToWalletUseCase,
+    private val encryptedPrefsManager: EncryptedPrefsManager,
+    private val razorpayManager: RazorpayManager
 ) {
 
     /**
@@ -72,9 +76,16 @@ class AutoTopUpUseCase @Inject constructor(
         }
 
         // 6. Charge token (silently in background)
-        // TODO(LOCK-4.8): Integrate with RazorpayManager server-side charge API, using token from EncryptedSharedPreferences.
+        val token = encryptedPrefsManager.getToken()
+            ?: return Result.failure(IllegalStateException("No saved payment instrument token found for auto top-up"))
+
+        val chargeResult = razorpayManager.chargeToken(userId, wallet.autoTopUpAmountPaise, token)
+        if (chargeResult.isFailure) {
+            return Result.failure(Exception("Silent token charge payment gateway error: ${chargeResult.exceptionOrNull()?.message}"))
+        }
+
         val paymentTxId = "pay_auto_" + UUID.randomUUID().toString().replace("-", "").take(14)
-        Timber.i("Initiating silent token charge for amount: %d Paise", wallet.autoTopUpAmountPaise)
+        Timber.i("Silent token charge succeeded. Payment ID: %s", paymentTxId)
 
         // 7. Deposit the top-up amount to wallet and log AUTO_TOPUP transaction
         val depositResult = depositToWalletUseCase(

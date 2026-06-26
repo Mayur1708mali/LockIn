@@ -124,7 +124,7 @@ fun BreakGateScreen(
             val stopVpnIntent = Intent(context, LockInVpnService::class.java).apply {
                 action = LockInVpnService.ACTION_STOP
             }
-            context.stopService(stopVpnIntent)
+            context.startService(stopVpnIntent)
             
             // Cancel Watchdog liveness
             SessionWatchdog.cancelWatchdog(context)

@@ -295,6 +295,7 @@ class LockInVpnService : VpnService() {
             .setSmallIcon(android.R.drawable.ic_lock_idle_lock) // Mono lock icon
             .setColor(0xFFFF3B30.toInt()) // Flat Accent Red Color #FF3B30
             .setOngoing(true)
+            .setOnlyAlertOnce(true) // Prevent sound/vibrate spam on updates
             .setContentIntent(pendingIntent)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -337,6 +338,21 @@ class LockInVpnService : VpnService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // Safeguard resource cleanup if stopped directly by context.stopService()
+        countdownJob?.cancel()
+        packetReaderThread?.interrupt()
+        try {
+            vpnInterface?.close()
+        } catch (e: IOException) {
+            Timber.e(e, "Error closing VPN descriptor in onDestroy")
+        }
+        vpnInterface = null
+        packetReaderThread = null
+        activeSessionId = null
+        
+        _isServiceRunning.value = false
+        _remainingTimeFlow.value = 0L
+
         serviceScope.cancel()
         Timber.i("LockInVpnService destroyed.")
     }

@@ -6,8 +6,10 @@
 
 package com.lockin.app.feature.onboarding
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lockin.app.core.data.payment.RazorpayManager
 import com.lockin.app.core.domain.model.AutoTopUpConfig
 import com.lockin.app.core.domain.model.TransactionType
 import com.lockin.app.core.domain.usecase.DepositToWalletUseCase
@@ -28,23 +30,23 @@ import javax.inject.Inject
  * @param currentStep The current step index (1-7).
  * @param isVpnPermissionGranted State representing if local VPN permission is granted.
  * @param isNotificationPermissionGranted State representing if notification permission is granted.
- * @param depositAmountPaise Selected initial deposit amount in Paise (e.g. ₹100, ₹200, ₹500).
- * @param isDepositProcessing True if deposit transaction is being verified/sent.
- * @param depositError Error message if the deposit flow fails.
- * @param isDepositSuccess True if deposit transaction successfully completed.
- * @param autoTopUpEnabled State representing if silent Auto Top-Up is toggled.
- * @param autoTopUpThresholdPaise Selected balance threshold in Paise for Auto Top-Up.
- * @param autoTopUpAmountPaise Selected top-up amount in Paise.
- * @param isCompleted True if the onboarding config is finalized.
+ * @param depositAmountPaise The chosen initial wallet deposit size.
+ * @param isDepositProcessing Processing state for wallet deposits checkout.
+ * @param isDepositSuccess Flag marking successful deposit completion.
+ * @param depositError Diagnostic message if wallet deposit processing fails.
+ * @param autoTopUpEnabled Auto Top-Up feature toggle.
+ * @param autoTopUpThresholdPaise Threshold value under which Auto Top-Up charges are fired.
+ * @param autoTopUpAmountPaise Custom size of Auto Top-Up charge transactions.
+ * @param isCompleted Marks if final step is finished to proceed to main dashboard.
  */
 data class OnboardingUiState(
     val currentStep: Int = 1,
     val isVpnPermissionGranted: Boolean = false,
     val isNotificationPermissionGranted: Boolean = false,
-    val depositAmountPaise: Int = 10000, // Default ₹100
+    val depositAmountPaise: Int = 10000, // Default ₹100 = 10000 Paise
     val isDepositProcessing: Boolean = false,
-    val depositError: String? = null,
     val isDepositSuccess: Boolean = false,
+    val depositError: String? = null,
     val autoTopUpEnabled: Boolean = true,
     val autoTopUpThresholdPaise: Int = 20000, // Default ₹200
     val autoTopUpAmountPaise: Int = 50000, // Default ₹500
@@ -58,7 +60,8 @@ data class OnboardingUiState(
 class OnboardingViewModel @Inject constructor(
     private val encryptedPrefsManager: EncryptedPrefsManager,
     private val saveAutoTopUpConfigUseCase: SaveAutoTopUpConfigUseCase,
-    private val depositToWalletUseCase: DepositToWalletUseCase
+    private val depositToWalletUseCase: DepositToWalletUseCase,
+    private val razorpayManager: RazorpayManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -114,10 +117,23 @@ class OnboardingViewModel @Inject constructor(
     }
 
     /**
-     * Indicates that Razorpay payment checkout has been launched.
+     * Triggers the real Razorpay checkout overlay using the SDK helper wrapper.
+     *
+     * @param activity The host activity.
      */
-    fun startDeposit() {
+    fun startDeposit(activity: Activity) {
+        val amount = _uiState.value.depositAmountPaise
+        if (amount <= 0) return
+
         _uiState.update { it.copy(isDepositProcessing = true, depositError = null) }
+        viewModelScope.launch {
+            val result = razorpayManager.deposit(activity, amount)
+            if (result.isSuccess) {
+                handleDepositSuccess(result.getOrThrow())
+            } else {
+                handleDepositFailure(result.exceptionOrNull()?.message ?: "Payment aborted")
+            }
+        }
     }
 
     /**

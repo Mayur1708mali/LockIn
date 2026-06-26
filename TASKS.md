@@ -174,7 +174,7 @@
 - [x] **9.8** Create `service/SessionWatchdog.kt` — `JobService`, checks VPN alive every 30s, restarts if dead, logs events
 - [x] **9.9** Implement heartbeat emission — log `HEARTBEAT` event every 30s during active session
 - [x] **9.10** Create `BootReceiver.kt` — `BroadcastReceiver`, restarts watchdog after device reboot if session was active
-- [ ] **9.11** Manual test: VPN on → Chrome blocked, GPay works. Force-kill service → auto-restart within 5s.
+- [x] **9.11** Manual test: VPN on → Chrome blocked, GPay works. Force-kill service → auto-restart within 5s.
 
 ---
 
@@ -194,13 +194,13 @@
 
 ## PHASE 11 — Break-Early Friction Gate
 
-- [ ] **11.1** Create `BreakGateViewModel.kt` — 3-step state machine, 10-second countdown for Step 1
-- [ ] **11.2** Create `BreakGateScreen.kt` — container rendering correct step from ViewModel state
-- [ ] **11.3** Build **Step 1 — Warning**: penalty amount (large red), time remaining, 10s countdown before "Continue" activates
-- [ ] **11.4** Build **Step 2 — Biometric**: trigger `BiometricPrompt` on entry, success → Step 3, failure/cancel → back to Step 1
-- [ ] **11.5** Build **Step 3 — Typed Confirmation**: exact penalty shown, `LockInTextField` requiring "BREAK" exactly, red confirm button
-- [ ] **11.6** On confirm → `BreakSessionUseCase` → stop VPN → navigate to `SessionComplete(BROKEN)`
-- [ ] **11.7** Handle payment failure in Step 3 — show error, keep session active, return to `ActiveSession`
+- [x] **11.1** Create `BreakGateViewModel.kt` — 3-step state machine, 10-second countdown for Step 1
+- [x] **11.2** Create `BreakGateScreen.kt` — container rendering correct step from ViewModel state
+- [x] **11.3** Build **Step 1 — Warning**: penalty amount (large red), time remaining, 10s countdown before "Continue" activates
+- [x] **11.4** Build **Step 2 — Biometric**: trigger `BiometricPrompt` on entry, success → Step 3, failure/cancel → back to Step 1
+- [x] **11.5** Build **Step 3 — Typed Confirmation**: exact penalty shown, `LockInTextField` requiring "BREAK" exactly, red confirm button
+- [x] **11.6** On confirm → `BreakSessionUseCase` → stop VPN → navigate to `SessionComplete(BROKEN)`
+- [x] **11.7** Handle payment failure in Step 3 — show error, keep session active, return to `ActiveSession`
 
 ---
 
@@ -217,26 +217,26 @@
 
 ## PHASE 13 — Wallet Screen
 
-- [ ] **13.1** Create `WalletViewModel.kt` — wallet state Flow, transaction history Flow, withdrawal state
-- [ ] **13.2** Create `WalletScreen.kt` — balance section, action buttons, transaction list
-- [ ] **13.3** Build `BalanceSection.kt` — large available balance, held balance row (visible only during active session)
-- [ ] **13.4** Build `AddMoneySheet.kt` — bottom sheet, presets (₹100/₹200/₹500/₹1000) + custom, Razorpay checkout on CTA
-- [ ] **13.5** Build `WithdrawSheet.kt` — available balance, destination label, biometric confirm, processing time disclaimer, min ₹50
-- [ ] **13.6** Build `TransactionList.kt` — grouped by date, icon by type, amount (green credit / red debit), timestamp
-- [ ] **13.7** Empty state: "No transactions yet. Start your first session." with Home CTA
+- [x] **13.1** Create `WalletViewModel.kt` — wallet state Flow, transaction history Flow, withdrawal state
+- [x] **13.2** Create `WalletScreen.kt` — balance section, action buttons, transaction list
+- [x] **13.3** Build `BalanceSection.kt` — large available balance, held balance row (visible only during active session)
+- [x] **13.4** Build `AddMoneySheet.kt` — bottom sheet, presets (₹100/₹200/₹500/₹1000) + custom, Razorpay checkout on CTA
+- [x] **13.5** Build `WithdrawSheet.kt` — available balance, destination label, biometric confirm, processing time disclaimer, min ₹50
+- [x] **13.6** Build `TransactionList.kt` — grouped by date, icon by type, amount (green credit / red debit), timestamp
+- [x] **13.7** Empty state: "No transactions yet. Start your first session." with Home CTA
 
 ---
 
 ## PHASE 14 — Payment Integration (Razorpay)
 
-- [ ] **14.1** Create `core/data/payment/RazorpayManager.kt` — wraps SDK, exposes `deposit()`, `chargeToken()`, `initiateWithdrawal()` as suspend functions
-- [ ] **14.2** Implement `deposit()` — opens checkout, handles success/failure callbacks
-- [ ] **14.3** Implement token saving on first deposit — save `razorpayPaymentId` to `EncryptedPrefsManager`
-- [ ] **14.4** Implement `chargeToken()` — calls backend which charges Razorpay server-side (never charge from app directly)
-- [ ] **14.5** Implement `initiateWithdrawal()` — calls backend withdrawal endpoint
-- [ ] **14.6** Create `di/PaymentModule.kt` — Hilt module providing `RazorpayManager`
-- [ ] **14.7** Test deposit with `success@razorpay` test UPI, failure with `failure@razorpay`
-- [ ] **14.8** Test that live keys are NOT present in debug builds
+- [x] **14.1** Create `core/data/payment/RazorpayManager.kt` — wraps SDK, exposes `deposit()`, `chargeToken()`, `initiateWithdrawal()` as suspend functions
+- [x] **14.2** Implement `deposit()` — opens checkout, handles success/failure callbacks
+- [x] **14.3** Implement token saving on first deposit — save `razorpayPaymentId` to `EncryptedPrefsManager`
+- [x] **14.4** Implement `chargeToken()` — calls backend which charges Razorpay server-side (never charge from app directly)
+- [x] **14.5** Implement `initiateWithdrawal()` — calls backend withdrawal endpoint
+- [x] **14.6** Create `di/PaymentModule.kt` — Hilt module providing `RazorpayManager`
+- [x] **14.7** Test deposit with `success@razorpay` test UPI, failure with `failure@razorpay`
+- [x] **14.8** Test that live keys are NOT present in debug builds
 
 ---
 

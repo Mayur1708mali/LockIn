@@ -79,6 +79,7 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val uiState by viewModel.uiState.collectAsState()
 
     // Trigger navigation on onboarding completion flag change
@@ -169,7 +170,7 @@ fun OnboardingScreen(
                             uiState = uiState,
                             onAmountSelected = { viewModel.updateDepositAmount(it) },
                             onInitiateDeposit = {
-                                viewModel.startDeposit()
+                                activity?.let { viewModel.startDeposit(it) }
                             },
                             onSuccessMock = { paymentId -> viewModel.handleDepositSuccess(paymentId) },
                             onFailureMock = { error -> viewModel.handleDepositFailure(error) }
@@ -425,10 +426,15 @@ private fun StepFirstDeposit(
 
         LockInButton(
             text = "Secure Checkout (₹${uiState.depositAmountPaise / 100})",
-            onClick = {
-                onInitiateDeposit()
-                showMockPaymentDialog = true
-            }
+            onClick = onInitiateDeposit
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LockInButton(
+            text = "Simulate Success (Dev Mode)",
+            onClick = { showMockPaymentDialog = true },
+            isSecondary = true
         )
     }
 

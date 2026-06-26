@@ -35,7 +35,9 @@ object DatabaseModule {
             context,
             LockInDatabase::class.java,
             "lockin_database"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     /**
