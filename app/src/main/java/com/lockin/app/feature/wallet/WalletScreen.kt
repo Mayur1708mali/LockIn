@@ -286,7 +286,7 @@ fun WalletScreen(
         ) {
             WithdrawSheetContent(
                 availableBalancePaise = uiState.wallet?.availableBalance ?: 0,
-                withdrawAmountRupees = uiState.withdrawAmountPaise,
+                withdrawAmountRupees = uiState.withdrawAmountRupees,
                 isProcessing = uiState.isWithdrawalProcessing,
                 error = uiState.withdrawalError,
                 isBiometricAvailable = viewModel.isBiometricAvailable(),
@@ -694,7 +694,7 @@ private fun WithdrawSheetContent(
             LockInTextField(
                 value = withdrawAmountRupees,
                 onValueChange = onAmountChange,
-                placeholder = "Min ₹50 (5000 Paise)",
+                placeholder = "Minimum ₹50",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }

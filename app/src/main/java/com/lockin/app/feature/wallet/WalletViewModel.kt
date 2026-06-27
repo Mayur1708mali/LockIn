@@ -41,7 +41,7 @@ data class WalletUiState(
     val isWalletLoading: Boolean = true,
     val transactions: List<WalletTransaction> = emptyList(),
     val isTransactionsLoading: Boolean = true,
-    val withdrawAmountPaise: String = "",
+    val withdrawAmountRupees: String = "",
     val isWithdrawalProcessing: Boolean = false,
     val withdrawalError: String? = null,
     val withdrawalSuccess: Boolean = false,
@@ -105,14 +105,14 @@ class WalletViewModel @Inject constructor(
     }
 
     /**
-     * Updates the input withdrawal amount value.
+     * Updates the input withdrawal amount value (in Rupees).
      *
      * @param amount text input representing the amount.
      */
     fun updateWithdrawAmount(amount: String) {
         _uiState.update {
             it.copy(
-                withdrawAmountPaise = amount,
+                withdrawAmountRupees = amount,
                 withdrawalError = null,
                 withdrawalSuccess = false
             )
@@ -128,13 +128,15 @@ class WalletViewModel @Inject constructor(
 
     /**
      * Triggers biometric confirmation gate before executing bank withdrawals.
+     * The input amount is in Rupees and converted to Paise.
      *
      * @param activity The FragmentActivity context needed to show system prompts.
      */
     fun initiateWithdrawal(activity: FragmentActivity) {
-        val amountInPaise = _uiState.value.withdrawAmountPaise.toIntOrNull() ?: 0
-        if (amountInPaise < 5000) {
-            _uiState.update { it.copy(withdrawalError = "Minimum withdrawal amount is ₹50 (5000 Paise)") }
+        val amountInRupees = _uiState.value.withdrawAmountRupees.toIntOrNull() ?: 0
+        val amountInPaise = amountInRupees * 100
+        if (amountInRupees < 50) {
+            _uiState.update { it.copy(withdrawalError = "Minimum withdrawal amount is ₹50") }
             return
         }
 
@@ -154,7 +156,7 @@ class WalletViewModel @Inject constructor(
             biometricHelper.authenticate(
                 activity = activity,
                 title = "Confirm Wallet Withdrawal",
-                subtitle = "Authorize withdrawal of ₹${amountInPaise / 100}.00 to your bank account."
+                subtitle = "Authorize withdrawal of ₹$amountInRupees.00 to your bank account."
             ).collect { result ->
                 when (result) {
                     is BiometricResult.Success -> {
@@ -175,9 +177,11 @@ class WalletViewModel @Inject constructor(
 
     /**
      * Simulator bypass to trigger withdrawals directly in environments without biometric enrollments.
+     * Converts the input Rupees amount to Paise.
      */
     fun simulateBiometricWithdrawal() {
-        val amountInPaise = _uiState.value.withdrawAmountPaise.toIntOrNull() ?: 0
+        val amountInRupees = _uiState.value.withdrawAmountRupees.toIntOrNull() ?: 0
+        val amountInPaise = amountInRupees * 100
         val userId = encryptedPrefsManager.getUserId() ?: "default_user"
         executeWithdrawal(userId, amountInPaise)
     }
@@ -195,7 +199,7 @@ class WalletViewModel @Inject constructor(
                     it.copy(
                         isWithdrawalProcessing = false,
                         withdrawalSuccess = true,
-                        withdrawAmountPaise = ""
+                        withdrawAmountRupees = ""
                     )
                 }
             } else {

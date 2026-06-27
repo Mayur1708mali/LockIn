@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -125,7 +126,8 @@ fun HomeScreen(
             HomeTopBar(
                 availableBalancePaise = uiState.wallet?.availableBalance ?: 0,
                 autoTopUpEnabled = uiState.isAutoTopUpEnabled,
-                onWalletBadgeClick = onNavigateToWallet
+                onWalletBadgeClick = onNavigateToWallet,
+                onSettingsClick = onNavigateToSettings
             )
         }
     ) { innerPadding ->
@@ -218,10 +220,12 @@ fun HomeScreen(
 private fun HomeTopBar(
     availableBalancePaise: Int,
     autoTopUpEnabled: Boolean,
-    onWalletBadgeClick: () -> Unit
+    onWalletBadgeClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
+            .statusBarsPadding()
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -231,7 +235,8 @@ private fun HomeTopBar(
             text = "LOCKIN",
             style = MaterialTheme.typography.titleLarge.copy(fontFamily = FontFamily.Monospace),
             fontWeight = FontWeight.Black,
-            color = Color(0xFFF5F5F7)
+            color = Color(0xFFF5F5F7),
+            modifier = Modifier.clickable { onSettingsClick() }
         )
 
         WalletBadge(

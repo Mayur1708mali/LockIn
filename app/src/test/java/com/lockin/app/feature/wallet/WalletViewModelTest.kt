@@ -108,10 +108,10 @@ class WalletViewModelTest {
         )
 
         // Act
-        viewModel.updateWithdrawAmount("8000") // ₹80
+        viewModel.updateWithdrawAmount("80") // ₹80
 
         // Assert
-        assertEquals("8000", viewModel.uiState.value.withdrawAmountPaise)
+        assertEquals("80", viewModel.uiState.value.withdrawAmountRupees)
         assertNull(viewModel.uiState.value.withdrawalError)
         assertFalse(viewModel.uiState.value.withdrawalSuccess)
     }
@@ -135,14 +135,14 @@ class WalletViewModelTest {
             encryptedPrefsManager,
             razorpayManager
         )
-        viewModel.updateWithdrawAmount("10000") // ₹100
+        viewModel.updateWithdrawAmount("100") // ₹100
 
         // Act
         viewModel.initiateWithdrawal(activity)
 
         // Assert
         assertTrue(viewModel.uiState.value.withdrawalSuccess)
-        assertEquals("", viewModel.uiState.value.withdrawAmountPaise)
+        assertEquals("", viewModel.uiState.value.withdrawAmountRupees)
         assertNull(viewModel.uiState.value.withdrawalError)
         coVerify { withdrawFromWalletUseCase(userId, 10000) }
     }
@@ -162,7 +162,7 @@ class WalletViewModelTest {
             encryptedPrefsManager,
             razorpayManager
         )
-        viewModel.updateWithdrawAmount("10000")
+        viewModel.updateWithdrawAmount("100")
 
         // Act
         viewModel.initiateWithdrawal(activity)
@@ -187,7 +187,7 @@ class WalletViewModelTest {
             encryptedPrefsManager,
             razorpayManager
         )
-        viewModel.updateWithdrawAmount("30000") // ₹300 (Available: ₹200)
+        viewModel.updateWithdrawAmount("300") // ₹300 (Available: ₹200)
 
         // Act
         viewModel.initiateWithdrawal(activity)
