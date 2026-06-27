@@ -1,0 +1,53 @@
+# Render Infrastructure as Code Configuration
+# Why: Enables automatic provisioning of PostgreSQL, Redis, and Web Server on Render deployment.
+services:
+  # Web Service
+  - type: web
+    name: lockin-server
+    runtime: docker
+    plan: free
+    dockerfilePath: server/Dockerfile
+    dockerContext: server
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      # Connect automatically to the provisioned PostgreSQL connection string
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lockin-db
+          property: connectionString
+      # Connect automatically to the provisioned Redis instance
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: lockin-redis
+          property: connectionString
+      # Automatically generate a unique secure JWT key on spin-up
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 30d
+      # External secrets: User must define these in Render Dashboard
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_PATH
+        value: /etc/secrets/firebase-service-account.json
+
+  # Redis Service
+  - type: redis
+    name: lockin-redis
+    plan: free
+    ipAllowList: [] # Limits access solely to services in the same Render team
+
+databases:
+  # PostgreSQL Database
+  - name: lockin-db
+    plan: free
+    databaseName: lockin
+    user: postgres
