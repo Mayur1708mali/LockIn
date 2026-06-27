@@ -50,3 +50,4 @@ databases:
   - name: lockin-db
     plan: free
     databaseName: lockin
+    user: lockin_user
