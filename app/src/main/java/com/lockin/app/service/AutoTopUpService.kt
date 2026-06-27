@@ -15,7 +15,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.lockin.app.core.domain.usecase.AutoTopUpUseCase
 import com.lockin.app.core.domain.repository.WalletRepository
-import com.lockin.app.core.notification.NotificationChannels
+import com.lockin.app.core.notification.LockInNotificationManager
 import com.lockin.app.core.security.EncryptedPrefsManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -31,7 +31,8 @@ class AutoTopUpService @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val autoTopUpUseCase: AutoTopUpUseCase,
     private val encryptedPrefsManager: EncryptedPrefsManager,
-    private val walletRepository: WalletRepository
+    private val walletRepository: WalletRepository,
+    private val notificationManager: LockInNotificationManager
 ) : CoroutineWorker(context, workerParams) {
 
     /**
@@ -56,7 +57,7 @@ class AutoTopUpService @AssistedInject constructor(
                 } else {
                     "₹500" // Default/fallback
                 }
-                showNotification("Wallet topped up · $amountText added automatically")
+                notificationManager.showAutoTopUpSuccessNotification(amountText)
             }
             return Result.success()
         } else {
@@ -72,36 +73,16 @@ class AutoTopUpService @AssistedInject constructor(
                 // If daily limit was reached, post the specific limit notification
                 errorMessage.contains("limit (3) reached", ignoreCase = true) || 
                 errorMessage.contains("limit reached", ignoreCase = true) -> {
-                    showNotification("Daily top-up limit reached.")
+                    notificationManager.showDailyCapNotification()
                 }
                 // Otherwise, payment/database failure -> post failure and temporarily disable auto top-up
                 else -> {
-                    showNotification("Auto top-up failed. Add money manually.")
+                    notificationManager.showAutoTopUpFailureNotification()
                     disableAutoTopUp(userId)
                 }
             }
             return Result.success() // Return success so that the system doesn't trigger retries on expected failures
         }
-    }
-
-    /**
-     * Shows a system notification under the WALLET channel.
-     *
-     * @param message The alert message to display to the user.
-     */
-    private fun showNotification(message: String) {
-        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val notificationId = 20002 // Distinct ID for wallet auto top-up alerts
-
-        val notification = NotificationCompat.Builder(applicationContext, NotificationChannels.WALLET_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("LockIn Wallet")
-            .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(notificationId, notification)
     }
 
     /**

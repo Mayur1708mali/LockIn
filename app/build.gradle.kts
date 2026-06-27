@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 val localProperties = Properties()
@@ -17,6 +18,7 @@ if (localPropertiesFile.exists()) {
 }
 val razorpayKeyTest = localProperties.getProperty("RAZORPAY_KEY_TEST") ?: "rzp_test_placeholder"
 val razorpayKeyLive = localProperties.getProperty("RAZORPAY_KEY_LIVE") ?: "rzp_live_placeholder"
+val baseUrl = localProperties.getProperty("BASE_URL") ?: "http://10.0.2.2:8080/api/"
 
 android {
     namespace = "com.lockin.app"
@@ -32,11 +34,14 @@ android {
     buildTypes {
         debug {
             buildConfigField("String", "RAZORPAY_KEY_ID", "\"$razorpayKeyTest\"")
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isDebuggable = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             buildConfigField("String", "RAZORPAY_KEY_ID", "\"$razorpayKeyLive\"")
+            buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
         }
     }
     compileOptions {
@@ -90,6 +95,8 @@ dependencies {
   // Local tests: jUnit, coroutines, Android runner
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.mockk)
+
 
   // Instrumented tests: jUnit rules and runners
   androidTestImplementation(libs.androidx.test.core)
@@ -126,9 +133,10 @@ dependencies {
   // Razorpay Checkout
   implementation(libs.razorpay)
 
-  // Firebase BOM + FCM Messaging
+  // Firebase BOM + FCM Messaging + Crashlytics
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.messaging)
+  implementation(libs.firebase.crashlytics)
 
   // AndroidX Biometrics
   implementation(libs.androidx.biometric)

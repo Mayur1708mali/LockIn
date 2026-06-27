@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">LockIn</string>
+
+    <!-- Session Notifications -->
+    <string name="notification_session_start_title">Focus Session Started</string>
+    <string name="notification_session_start_body">Your focus session of %1$s has started. Let\'s stay locked in!</string>
+    <string name="notification_session_halfway_title">Focus Session Halfway</string>
+    <string name="notification_session_halfway_body">You are halfway through! Keep going.</string>
+    <string name="notification_session_15min_title">15 Minutes Remaining</string>
+    <string name="notification_session_15min_body">Only 15 minutes left in your focus session. Stay strong!</string>
+    <string name="notification_session_complete_title">Focus Session Completed!</string>
+    <string name="notification_session_complete_body">Great job! Held balance has been returned to your available wallet.</string>
+    <string name="notification_vpn_gap_title">VPN Connection Interrupted!</string>
+    <string name="notification_vpn_gap_body">VPN connection went down. Re-establishing connection...</string>
+    <string name="notification_session_break_title">Focus Session Broken</string>
+    <string name="notification_session_break_body">Session was ended early. Penalty has been permanently deducted.</string>
+
+    <!-- Wallet Notifications -->
+    <string name="notification_auto_topup_success_title">Wallet Auto Topped Up</string>
+    <string name="notification_auto_topup_success_body">Wallet topped up · %1$s added automatically</string>
+    <string name="notification_auto_topup_failure_title">Auto Top-Up Failed</string>
+    <string name="notification_auto_topup_failure_body">Auto top-up failed. Add money manually.</string>
+    <string name="notification_daily_cap_title">Daily Top-Up Limit Reached</string>
+    <string name="notification_daily_cap_body">Daily top-up limit reached.</string>
 </resources>

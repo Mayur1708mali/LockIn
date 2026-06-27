@@ -41,6 +41,7 @@ class EncryptedPrefsManager @Inject constructor(
 
     companion object {
         private const val KEY_RAZORPAY_TOKEN = "key_razorpay_token"
+        private const val KEY_AUTH_TOKEN = "key_auth_token"
         private const val KEY_USER_ID = "key_user_id"
         private const val KEY_AUTO_TOPUP_ENABLED = "key_auto_topup_enabled"
         private const val KEY_AUTO_TOPUP_THRESHOLD = "key_auto_topup_threshold"
@@ -48,6 +49,21 @@ class EncryptedPrefsManager @Inject constructor(
         private const val KEY_PAYMENT_METHOD_LABEL = "key_payment_method_label"
         private const val KEY_IS_ROOTED = "key_is_rooted"
         private const val KEY_ONBOARDING_COMPLETE = "key_onboarding_complete"
+        private const val KEY_FCM_TOKEN = "key_fcm_token"
+    }
+
+    /**
+     * Saves the FCM registration token securely.
+     */
+    fun saveFcmToken(token: String) {
+        sharedPreferences.edit().putString(KEY_FCM_TOKEN, token).apply()
+    }
+
+    /**
+     * Retrieves the saved FCM registration token.
+     */
+    fun getFcmToken(): String? {
+        return sharedPreferences.getString(KEY_FCM_TOKEN, null)
     }
 
     /**
@@ -90,6 +106,20 @@ class EncryptedPrefsManager @Inject constructor(
      */
     fun getToken(): String? {
         return sharedPreferences.getString(KEY_RAZORPAY_TOKEN, null)
+    }
+
+    /**
+     * Saves the authenticated user JWT token securely.
+     */
+    fun saveAuthToken(token: String) {
+        sharedPreferences.edit().putString(KEY_AUTH_TOKEN, token).apply()
+    }
+
+    /**
+     * Retrieves the authenticated user JWT token.
+     */
+    fun getAuthToken(): String? {
+        return sharedPreferences.getString(KEY_AUTH_TOKEN, null)
     }
 
     /**

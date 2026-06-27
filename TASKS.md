@@ -279,81 +279,81 @@
 
 ## PHASE 18 — Notifications (FCM)
 
-- [ ] **18.1** Create `core/notification/NotificationChannels.kt` — channels: `SESSION` (high), `WALLET` (default), `SYSTEM` (low)
-- [ ] **18.2** Create `core/notification/LockInNotificationManager.kt` — one function per notification type
-- [ ] **18.3** Create `core/notification/LockInFirebaseService.kt` — extends `FirebaseMessagingService`, routes push to `LockInNotificationManager`
-- [ ] **18.4** Register `LockInFirebaseService` in `AndroidManifest.xml`
-- [ ] **18.5** Implement FCM token refresh — save to backend via `UserApi.saveFcmToken()` in `onNewToken()`
-- [ ] **18.6** Test all 9 notification types (session start, halfway, 15-min, complete, VPN gap, break, auto top-up success, auto top-up failure, daily cap)
+- [x] **18.1** Create `core/notification/NotificationChannels.kt` — channels: `SESSION` (high), `WALLET` (default), `SYSTEM` (low)
+- [x] **18.2** Create `core/notification/LockInNotificationManager.kt` — one function per notification type
+- [x] **18.3** Create `core/notification/LockInFirebaseService.kt` — extends `FirebaseMessagingService`, routes push to `LockInNotificationManager`
+- [x] **18.4** Register `LockInFirebaseService` in `AndroidManifest.xml`
+- [x] **18.5** Implement FCM token refresh — save to backend via `UserApi.saveFcmToken()` in `onNewToken()`
+- [x] **18.6** Test all 9 notification types (session start, halfway, 15-min, complete, VPN gap, break, auto top-up success, auto top-up failure, daily cap)
 
 ---
 
 ## PHASE 19 — Backend API Client (Android side)
 
-- [ ] **19.1** Create `core/data/remote/api/SessionApi.kt` — Retrofit: `createSession()`, `updateSession()`, `heartbeat()`, `getSession()`
-- [ ] **19.2** Create `core/data/remote/api/WalletApi.kt` — `getWallet()`, `deposit()`, `withdraw()`, `autoTopUp()`
-- [ ] **19.3** Create `core/data/remote/api/UserApi.kt` — `registerDevice()`, `saveFcmToken()`, `deleteAccount()`
-- [ ] **19.4** Create `core/data/remote/dto/` — request/response DTOs for all endpoints
-- [ ] **19.5** Create `core/data/remote/interceptor/AuthInterceptor.kt` — attaches JWT header
-- [ ] **19.6** Create `core/data/remote/interceptor/LoggingInterceptor.kt` — debug builds only
-- [ ] **19.7** Create `di/NetworkModule.kt` — Hilt module providing `OkHttpClient`, `Retrofit`, all API interfaces
-- [ ] **19.8** Add `BASE_URL` to `local.properties`, inject via `BuildConfig`
-- [ ] **19.9** Add certificate pinning to `OkHttpClient` for release build flavor
+- [x] **19.1** Create `core/data/remote/api/SessionApi.kt` — Retrofit: `createSession()`, `updateSession()`, `heartbeat()`, `getSession()`
+- [x] **19.2** Create `core/data/remote/api/WalletApi.kt` — `getWallet()`, `deposit()`, `withdraw()`, `autoTopUp()`
+- [x] **19.3** Create `core/data/remote/api/UserApi.kt` — `registerDevice()`, `saveFcmToken()`, `deleteAccount()`
+- [x] **19.4** Create `core/data/remote/dto/` — request/response DTOs for all endpoints
+- [x] **19.5** Create `core/data/remote/interceptor/AuthInterceptor.kt` — attaches JWT header
+- [x] **19.6** Create `core/data/remote/interceptor/LoggingInterceptor.kt` — debug builds only
+- [x] **19.7** Create `di/NetworkModule.kt` — Hilt module providing `OkHttpClient`, `Retrofit`, all API interfaces
+- [x] **19.8** Add `BASE_URL` to `local.properties`, inject via `BuildConfig`
+- [x] **19.9** Add certificate pinning to `OkHttpClient` for release build flavor
 
 ---
 
 ## PHASE 20 — Backend Services (Server)
 
-- [ ] **20.1** Set up backend project (Node.js + Express recommended)
-- [ ] **20.2** Set up PostgreSQL — tables: `users`, `sessions`, `session_events`, `wallets`, `wallet_transactions`
-- [ ] **20.3** Set up Redis — live session state + daily auto top-up counter per user
-- [ ] **20.4** Implement `POST /sessions` — create session, validate wallet balance, move to held
-- [ ] **20.5** Implement `PATCH /sessions/:id` — update status COMPLETED/BROKEN, settle wallet funds
-- [ ] **20.6** Implement `POST /sessions/:id/heartbeat` — log heartbeat, update last-seen
-- [ ] **20.7** Implement `GET /wallet` — return wallet state
-- [ ] **20.8** Implement `POST /wallet/deposit` — verify Razorpay webhook, credit wallet
-- [ ] **20.9** Implement `POST /wallet/withdraw` — validate balance, initiate Razorpay refund
-- [ ] **20.10** Implement `POST /wallet/auto-topup` — server-side Razorpay token charge, enforce daily cap, credit wallet
-- [ ] **20.11** Implement Razorpay webhook handler — verify HMAC signature on all incoming webhooks
-- [ ] **20.12** Implement `POST /users/fcm-token` — save/update FCM token
-- [ ] **20.13** Implement missed heartbeat cron — every 5 min, find sessions with no heartbeat > 10 min, mark BROKEN, settle penalty
-- [ ] **20.14** Implement FCM push triggers — halfway, 15-min warning, completion, auto top-up events
-- [ ] **20.15** Set up JWT auth — issue on device registration, verify on every request
-- [ ] **20.16** Deploy backend to Railway or Render (MVP), or AWS ECS (production)
-- [ ] **20.17** Set all secrets as environment variables — never hardcode anywhere
+- [x] **20.1** Set up backend project (Node.js + Express recommended)
+- [x] **20.2** Set up PostgreSQL — tables: `users`, `sessions`, `session_events`, `wallets`, `wallet_transactions`
+- [x] **20.3** Set up Redis — live session state + daily auto top-up counter per user
+- [x] **20.4** Implement `POST /sessions` — create session, validate wallet balance, move to held
+- [x] **20.5** Implement `PATCH /sessions/:id` — update status COMPLETED/BROKEN, settle wallet funds
+- [x] **20.6** Implement `POST /sessions/:id/heartbeat` — log heartbeat, update last-seen
+- [x] **20.7** Implement `GET /wallet` — return wallet state
+- [x] **20.8** Implement `POST /wallet/deposit` — verify Razorpay webhook, credit wallet
+- [x] **20.9** Implement `POST /wallet/withdraw` — validate balance, initiate Razorpay refund
+- [x] **20.10** Implement `POST /wallet/auto-topup` — server-side Razorpay token charge, enforce daily cap, credit wallet
+- [x] **20.11** Implement Razorpay webhook handler — verify HMAC signature on all incoming webhooks
+- [x] **20.12** Implement `POST /users/fcm-token` — save/update FCM token
+- [x] **20.13** Implement missed heartbeat cron — every 5 min, find sessions with no heartbeat > 10 min, mark BROKEN, settle penalty
+- [x] **20.14** Implement FCM push triggers — halfway, 15-min warning, completion, auto top-up events
+- [x] **20.15** Set up JWT auth — issue on device registration, verify on every request
+- [x] **20.16** Deploy backend to Railway or Render (MVP), or AWS ECS (production)
+- [x] **20.17** Set all secrets as environment variables — never hardcode anywhere
 
 ---
 
 ## PHASE 21 — Testing & QA
 
-- [ ] **21.1** Unit tests for all use cases (mock repositories)
-- [ ] **21.2** Unit tests for `SessionViewModel`, `WalletViewModel`, `BreakGateViewModel`
-- [ ] **21.3** Integration tests for all Room DAOs
-- [ ] **21.4** Compose UI tests for onboarding flow
-- [ ] **21.5** Compose UI test for break gate — verify all 3 steps enforced, no skipping possible
-- [ ] **21.6** Manual: full session end-to-end on real device — start → complete → wallet credited
-- [ ] **21.7** Manual: break session early — all 3 steps, penalty charged, wallet debited
-- [ ] **21.8** Manual: force-kill VPN service mid-session → verify restart within 5 seconds
-- [ ] **21.9** Manual: uninstall app mid-session → verify backend settles penalty via missed heartbeat
-- [ ] **21.10** Manual: reduce wallet below threshold → verify auto top-up fires silently
-- [ ] **21.11** Manual: all 9 notifications appear and deep link correctly
-- [ ] **21.12** Test on minimum SDK device (Android 8.0 / API 26)
-- [ ] **21.13** Test on Samsung and Xiaomi — verify VPN not killed by battery optimization; prompt whitelist if needed
+- [x] **21.1** Unit tests for all use cases (mock repositories)
+- [x] **21.2** Unit tests for `SessionViewModel`, `WalletViewModel`, `BreakGateViewModel`
+- [x] **21.3** Integration tests for all Room DAOs
+- [x] **21.4** Compose UI tests for onboarding flow
+- [x] **21.5** Compose UI test for break gate — verify all 3 steps enforced, no skipping possible
+- [x] **21.6** Manual: full session end-to-end on real device — start → complete → wallet credited
+- [x] **21.7** Manual: break session early — all 3 steps, penalty charged, wallet debited
+- [x] **21.8** Manual: force-kill VPN service mid-session → verify restart within 5 seconds
+- [x] **21.9** Manual: uninstall app mid-session → verify backend settles penalty via missed heartbeat
+- [x] **21.10** Manual: reduce wallet below threshold → verify auto top-up fires silently
+- [x] **21.11** Manual: all 9 notifications appear and deep link correctly
+- [x] **21.12** Test on minimum SDK device (Android 8.0 / API 26)
+- [x] **21.13** Test on Samsung and Xiaomi — verify VPN not killed by battery optimization; prompt whitelist if needed
 
 ---
 
 ## PHASE 22 — Pre-Launch
 
-- [ ] **22.1** Switch Razorpay test keys to live keys in release build flavor
-- [ ] **22.2** Enable certificate pinning in release `OkHttpClient`
-- [ ] **22.3** Remove all bare `TODO` comments or confirm each has ticket reference format `// TODO(LOCK-XXX):`
-- [ ] **22.4** Set `debuggable false` in release build config
-- [ ] **22.5** Enable R8/ProGuard — add rules for Razorpay SDK, Retrofit, Room, Hilt
-- [ ] **22.6** Set up signing keystore, store credentials in CI secrets (not in git)
-- [ ] **22.7** Write privacy policy — covers VPN (local only), wallet data, Razorpay handling
+- [x] **22.1** Switch Razorpay test keys to live keys in release build flavor
+- [x] **22.2** Enable certificate pinning in release `OkHttpClient`
+- [x] **22.3** Remove all bare `TODO` comments or confirm each has ticket reference format `// TODO(LOCK-XXX):`
+- [x] **22.4** Set `debuggable false` in release build config
+- [x] **22.5** Enable R8/ProGuard — add rules for Razorpay SDK, Retrofit, Room, Hilt
+- [x] **22.6** Set up signing keystore, store credentials in CI secrets (not in git)
+- [x] **22.7** Write privacy policy — covers VPN (local only), wallet data, Razorpay handling
 - [ ] **22.8** Create Play Store listing — screenshots, description, content rating
 - [ ] **22.9** Submit for review — declare VPN usage in Play Store data safety form
-- [ ] **22.10** Set up Firebase Crashlytics for production crash reporting
+- [x] **22.10** Set up Firebase Crashlytics for production crash reporting
 - [ ] **22.11** Set up uptime monitoring for backend (UptimeRobot or Datadog)
 
 ---
