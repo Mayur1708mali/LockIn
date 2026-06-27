@@ -21,3 +21,9 @@ Thumbs.db
 # Production build
 dist/
 build/
+
+# Firebase Service Account JSON (Sensitive credentials)
+configs/firebase-service-account.json
+*.json.key
+firebase-service-account.json
+

@@ -6,7 +6,8 @@ services:
     name: lockin-server
     runtime: docker
     plan: free
-    dockerfilePath: Dockerfile
+    dockerfilePath: server/Dockerfile
+    dockerContext: server
     envVars:
       - key: PORT
         value: 3000
@@ -36,7 +37,7 @@ services:
       - key: RAZORPAY_WEBHOOK_SECRET
         sync: false
       - key: FIREBASE_SERVICE_ACCOUNT_PATH
-        value: configs/firebase-service-account.json
+        value: /etc/secrets/firebase-service-account.json
 
   # Redis Service
   - type: redis
@@ -49,4 +50,3 @@ databases:
   - name: lockin-db
     plan: free
     databaseName: lockin
-    user: postgres
