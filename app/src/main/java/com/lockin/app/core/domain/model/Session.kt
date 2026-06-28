@@ -12,7 +12,7 @@ data class Session(
     val actualEndTime: Long?,
     val penaltyAmount: Int, // in paise
     val currency: String = "INR",
-    val walletTxHoldId: String?,
+    val walletTxHoldId: String? = null,
     val allowlistVersion: Int,
     val platform: String = "android"
 )

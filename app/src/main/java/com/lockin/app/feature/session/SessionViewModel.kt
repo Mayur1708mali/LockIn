@@ -158,7 +158,7 @@ class SessionViewModel @Inject constructor(
     /**
      * Atomically releases locked funds and updates session state to COMPLETED.
      */
-    private fun completeSession() {
+    internal fun completeSession() {
         viewModelScope.launch {
             try {
                 val result = completeSessionUseCase()

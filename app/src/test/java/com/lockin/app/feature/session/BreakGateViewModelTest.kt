@@ -82,20 +82,14 @@ class BreakGateViewModelTest {
 
     @Test
     fun `moveToBiometric - timer finished - updates step to BIOMETRIC`() = runTest {
+        // Arrange
         viewModel.initSession(sessionId, penaltyAmount)
         
-        // Arrange (cheat countdown state)
-        // Set warning seconds left to 0 directly
-        viewModel.updateConfirmationText("") // dummy updates to sync state, but warningSecondsLeft is in UIState copy
-        // We will just call the private countdown ticks or simulate timer finished by copying uiState in a test helper,
-        // but since we have a state flow we can simulate countdown completion or manipulate state in test.
-        // Let's verify moveToBiometric works if warningSecondsLeft <= 0:
-        viewModel.initSession(sessionId, penaltyAmount)
-        // Wait for countdown timer or mock it, but wait: the warningSecondsLeft ticks down every 1000ms.
-        // Since we are using UnconfinedTestDispatcher, delay(1000) ticks instantly in runTest!
-        // So by launching in runTest, the entire 10-second countdown runs immediately and finishes!
-        // Let's check:
-        assertTrue(viewModel.uiState.value.warningSecondsLeft <= 0)
+        // Advance time to allow the 10-second warning countdown to complete
+        testScheduler.advanceUntilIdle()
+
+        // Assert warning seconds left is 0
+        assertEquals(0, viewModel.uiState.value.warningSecondsLeft)
 
         // Act
         viewModel.moveToBiometric()
@@ -161,7 +155,17 @@ class BreakGateViewModelTest {
     @Test
     fun `confirmBreak - correct typed text - breaks session early charging penalty`() = runTest {
         // Arrange
-        val brokenSession = Session(sessionId, "user_123", SessionStatus.BROKEN, 0, 0, 0, penaltyAmount, null, 1)
+        val brokenSession = Session(
+            sessionId = sessionId,
+            userId = "user_123",
+            status = SessionStatus.BROKEN,
+            startTime = 0,
+            targetEndTime = 0,
+            actualEndTime = null,
+            penaltyAmount = penaltyAmount,
+            walletTxHoldId = null,
+            allowlistVersion = 1
+        )
         coEvery { breakSessionUseCase() } returns Result.success(brokenSession)
 
         viewModel.initSession(sessionId, penaltyAmount)

@@ -238,19 +238,14 @@ class SessionUseCasesTest {
 
     @Test
     fun `LogSessionEventUseCase - appends session event correctly`() = runTest {
-        // Arrange
-        val event = SessionEvent(
-            eventId = "event_123",
-            sessionId = "session_123",
-            eventType = "HEARTBEAT",
-            timestamp = System.currentTimeMillis(),
-            metadata = null
-        )
-
         // Act
-        logSessionEventUseCase(event)
+        logSessionEventUseCase("session_123", "HEARTBEAT", null)
 
         // Assert
-        coVerify { sessionRepository.insertEvent(event) }
+        coVerify {
+            sessionRepository.insertEvent(match {
+                it.sessionId == "session_123" && it.eventType == "HEARTBEAT" && it.metadata == null
+            })
+        }
     }
 }

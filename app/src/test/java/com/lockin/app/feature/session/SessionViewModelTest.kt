@@ -55,7 +55,7 @@ class SessionViewModelTest {
         completeSessionUseCase = mockk(relaxed = true)
         sessionRepository = mockk(relaxed = true)
 
-        coEvery { getActiveSessionUseCase() } returns Result.success(activeSession)
+        coEvery { getActiveSessionUseCase() } returns activeSession
         every { sessionRepository.getActiveSessionFlow() } returns activeSessionFlow
     }
 
@@ -79,7 +79,7 @@ class SessionViewModelTest {
     @Test
     fun `init - no active session found - sets UI state to Error`() = runTest {
         // Arrange
-        coEvery { getActiveSessionUseCase() } returns Result.failure(IllegalStateException("No session"))
+        coEvery { getActiveSessionUseCase() } returns null
 
         // Act
         viewModel = SessionViewModel(
