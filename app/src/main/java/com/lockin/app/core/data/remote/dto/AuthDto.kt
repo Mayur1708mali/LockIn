@@ -23,5 +23,6 @@ data class GoogleSignInResponse(
     @SerializedName("jwt") val jwt: String,
     @SerializedName("userId") val userId: String,
     @SerializedName("email") val email: String,
-    @SerializedName("displayName") val displayName: String
+    @SerializedName("displayName") val displayName: String,
+    @SerializedName("isExistingUser") val isExistingUser: Boolean
 )

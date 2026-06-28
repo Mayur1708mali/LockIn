@@ -22,6 +22,12 @@ interface WalletTransactionDao {
     suspend fun insertTransaction(transaction: WalletTransactionEntity): Long
 
     /**
+     * Inserts a list of transactions, replacing existing ones on conflict (used for syncing).
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTransactions(transactions: List<WalletTransactionEntity>): List<Long>
+
+    /**
      * Streams all wallet transactions sorted by date/timestamp descending.
      */
     @Query("SELECT * FROM wallet_transactions ORDER BY timestamp DESC")

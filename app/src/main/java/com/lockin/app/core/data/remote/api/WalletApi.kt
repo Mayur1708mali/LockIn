@@ -8,6 +8,7 @@ package com.lockin.app.core.data.remote.api
 import com.lockin.app.core.data.remote.dto.AutoTopUpRequest
 import com.lockin.app.core.data.remote.dto.DepositRequest
 import com.lockin.app.core.data.remote.dto.WalletDto
+import com.lockin.app.core.data.remote.dto.WalletTransactionDto
 import com.lockin.app.core.data.remote.dto.WithdrawRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -63,4 +64,13 @@ interface WalletApi {
     suspend fun autoTopUp(
         @Body request: AutoTopUpRequest
     ): WalletDto
+
+    /**
+     * Retrieves all wallet transactions for the authenticated user from the server.
+     * Why: Used to sync remote transaction history to local database on sign in.
+     *
+     * @return List of all user wallet transaction data transfer objects.
+     */
+    @GET("wallet/transactions")
+    suspend fun getTransactions(): List<WalletTransactionDto>
 }

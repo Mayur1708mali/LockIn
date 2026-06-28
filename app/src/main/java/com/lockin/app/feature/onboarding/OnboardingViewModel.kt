@@ -95,13 +95,26 @@ class OnboardingViewModel @Inject constructor(
                     val verificationResult = signInWithGoogleUseCase(idToken)
                     verificationResult.fold(
                         onSuccess = { response ->
-                            Timber.d("Google Sign-In succeeded for user ID: ${response.userId}")
-                            _uiState.update {
-                                it.copy(
-                                    isGoogleSignInLoading = false,
-                                    isGoogleSignInSuccess = true,
-                                    currentStep = 1 // Progress directly to concept screen (Step 1)
-                                )
+                            Timber.d("Google Sign-In succeeded for user ID: ${response.userId}, isExistingUser: ${response.isExistingUser}")
+                            if (response.isExistingUser) {
+                                // Existing user: mark onboarding as complete and skip setup steps
+                                encryptedPrefsManager.saveOnboardingComplete(true)
+                                _uiState.update {
+                                    it.copy(
+                                        isGoogleSignInLoading = false,
+                                        isGoogleSignInSuccess = true,
+                                        isCompleted = true
+                                    )
+                                }
+                            } else {
+                                // New user: progress through onboarding steps
+                                _uiState.update {
+                                    it.copy(
+                                        isGoogleSignInLoading = false,
+                                        isGoogleSignInSuccess = true,
+                                        currentStep = 1 // Progress directly to concept screen (Step 1)
+                                    )
+                                }
                             }
                         },
                         onFailure = { error ->

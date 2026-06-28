@@ -16,6 +16,11 @@ interface SessionRepository {
     suspend fun insertSession(session: Session)
 
     /**
+     * Inserts multiple session records.
+     */
+    suspend fun insertSessions(sessions: List<Session>)
+
+    /**
      * Updates an existing session record with new lifecycle information.
      */
     suspend fun updateSession(session: Session)

@@ -75,6 +75,13 @@ class WalletRepositoryImpl @Inject constructor(
     }
 
     /**
+     * Inserts multiple transactions to the local database.
+     */
+    override suspend fun insertTransactions(transactions: List<WalletTransaction>) {
+        walletTransactionDao.insertTransactions(transactions.map { it.toEntity() })
+    }
+
+    /**
      * Streams all wallet transactions sorted by date/timestamp descending, mapped to domain models.
      */
     override fun getAllTransactionsFlow(): Flow<List<WalletTransaction>> {

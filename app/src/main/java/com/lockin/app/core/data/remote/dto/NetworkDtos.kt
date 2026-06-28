@@ -131,3 +131,18 @@ data class StatusResponse(
     @SerializedName("success") val success: Boolean,
     @SerializedName("message") val message: String? = null
 )
+
+/**
+ * Remote representation of a wallet transaction.
+ * Why: Used to parse the user's remote transaction history from the server.
+ */
+data class WalletTransactionDto(
+    @SerializedName("txId") val txId: String,
+    @SerializedName("userId") val userId: String,
+    @SerializedName("type") val type: String, // Maps to TransactionType enum
+    @SerializedName("amount") val amount: Int, // in paise
+    @SerializedName("direction") val direction: String, // "CREDIT" or "DEBIT"
+    @SerializedName("sessionId") val sessionId: String?,
+    @SerializedName("description") val description: String,
+    @SerializedName("timestamp") val timestamp: Long
+)

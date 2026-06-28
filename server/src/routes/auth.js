@@ -108,7 +108,8 @@ router.post('/google', async (req, res, next) => {
         jwt: token,
         userId: user.user_id,
         email: user.email,
-        displayName: user.display_name
+        displayName: user.display_name,
+        isExistingUser: userQuery.rows.length > 0
       });
 
     } catch (err) {

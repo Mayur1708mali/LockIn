@@ -37,6 +37,13 @@ class SessionRepositoryImpl @Inject constructor(
     }
 
     /**
+     * Inserts multiple session records into the local database.
+     */
+    override suspend fun insertSessions(sessions: List<Session>) {
+        sessionDao.insertSessions(sessions.map { it.toEntity() })
+    }
+
+    /**
      * Updates an existing session record in the local database.
      */
     override suspend fun updateSession(session: Session) {

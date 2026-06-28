@@ -22,6 +22,12 @@ interface SessionDao {
     suspend fun insertSession(session: SessionEntity): Long
 
     /**
+     * Inserts multiple session records. If any already exist, replaces them.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSessions(sessions: List<SessionEntity>): List<Long>
+
+    /**
      * Updates an existing session record with new lifecycle information.
      */
     @Update

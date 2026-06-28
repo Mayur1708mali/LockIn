@@ -46,6 +46,11 @@ interface WalletRepository {
     suspend fun insertTransaction(transaction: WalletTransaction)
 
     /**
+     * Inserts a list of transactions, replacing duplicates.
+     */
+    suspend fun insertTransactions(transactions: List<WalletTransaction>)
+
+    /**
      * Streams the transaction history sorted by date descending.
      */
     fun getAllTransactionsFlow(): Flow<List<WalletTransaction>>

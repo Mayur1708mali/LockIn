@@ -434,6 +434,28 @@ router.post('/:id/heartbeat', authenticateToken, async (req, res, next) => {
 });
 
 /**
+ * Retrieves all detox focus sessions for the authenticated user.
+ * Route: GET /sessions
+ * Headers: Authorization: Bearer <token>
+ * Response Body: Array of SessionDto
+ */
+router.get('/', authenticateToken, async (req, res, next) => {
+  const userId = req.user.userId;
+
+  try {
+    const result = await query(
+      'SELECT * FROM sessions WHERE user_id = $1 ORDER BY start_time DESC',
+      [userId]
+    );
+
+    const sessionDtos = result.rows.map(row => mapToSessionDto(row));
+    res.status(200).json(sessionDtos);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * Retrieves details for a specific session by its ID.
  * Route: GET /sessions/:id
  * Headers: Authorization: Bearer <token>

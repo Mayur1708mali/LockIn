@@ -73,4 +73,13 @@ interface SessionApi {
     suspend fun getSession(
         @Path("id") sessionId: String
     ): SessionDto
+
+    /**
+     * Retrieves all sessions for the authenticated user from the server.
+     * Why: Used to sync remote session history to local database on sign in.
+     *
+     * @return List of all user session data transfer objects.
+     */
+    @GET("sessions")
+    suspend fun getSessions(): List<SessionDto>
 }

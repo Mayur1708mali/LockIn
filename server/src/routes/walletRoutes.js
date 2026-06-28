@@ -57,6 +57,38 @@ router.get('/', authenticateToken, async (req, res, next) => {
 });
 
 /**
+ * Retrieves all wallet transactions for the authenticated user.
+ * Route: GET /wallet/transactions
+ * Headers: Authorization: Bearer <token>
+ * Response Body: Array of WalletTransactionDto
+ */
+router.get('/transactions', authenticateToken, async (req, res, next) => {
+  const userId = req.user.userId;
+
+  try {
+    const result = await query(
+      'SELECT * FROM wallet_transactions WHERE user_id = $1 ORDER BY timestamp DESC',
+      [userId]
+    );
+
+    const transactionDtos = result.rows.map(row => ({
+      txId: row.tx_id,
+      userId: row.user_id,
+      type: row.type,
+      amount: row.amount,
+      direction: row.direction,
+      sessionId: row.session_id,
+      description: row.description,
+      timestamp: parseInt(row.timestamp, 10)
+    }));
+
+    res.status(200).json(transactionDtos);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * Reports a manual Razorpay deposit to the server for verification and credits the wallet.
  * Route: POST /wallet/deposit
  * Headers: Authorization: Bearer <token>
