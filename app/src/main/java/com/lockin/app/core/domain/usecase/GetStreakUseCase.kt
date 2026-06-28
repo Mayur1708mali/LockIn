@@ -3,6 +3,7 @@ package com.lockin.app.core.domain.usecase
 import com.lockin.app.core.domain.model.Session
 import com.lockin.app.core.domain.model.SessionStatus
 import com.lockin.app.core.domain.repository.SessionRepository
+import com.lockin.app.core.security.EncryptedPrefsManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
@@ -18,7 +19,8 @@ import javax.inject.Inject
  * If there is no completed session today or yesterday, the current streak is 0.
  */
 class GetStreakUseCase @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val encryptedPrefsManager: EncryptedPrefsManager
 ) {
 
     /**
@@ -28,7 +30,13 @@ class GetStreakUseCase @Inject constructor(
      */
     operator fun invoke(): Flow<Int> {
         return sessionRepository.getAllSessionsFlow().map { sessions ->
-            calculateCurrentStreak(sessions)
+            val userId = encryptedPrefsManager.getUserId()
+            val filteredSessions = if (userId != null) {
+                sessions.filter { it.userId == userId }
+            } else {
+                sessions
+            }
+            calculateCurrentStreak(filteredSessions)
         }
     }
 

@@ -16,11 +16,11 @@ import com.lockin.app.core.security.EncryptedPrefsManager
 import com.lockin.app.core.util.AuthEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -38,6 +38,18 @@ sealed interface UiState {
     data class Error(val message: String) : UiState
 }
 
+/**
+ * UI State for the Account screen.
+ */
+data class AccountUiState(
+    val displayName: String = "",
+    val email: String = "",
+    val memberSince: String = "",
+    val totalSessions: Int = 0,
+    val totalTimeLocked: String = "0h 0m",
+    val currentStreak: Int = 0
+)
+
 @HiltViewModel
 class AccountViewModel @Inject constructor(
     private val encryptedPrefsManager: EncryptedPrefsManager,
@@ -46,61 +58,70 @@ class AccountViewModel @Inject constructor(
     private val signOutUseCase: SignOutUseCase
 ) : ViewModel() {
 
-    // Cache static fields locally upon launch
-    val displayName: String = encryptedPrefsManager.getGoogleDisplayName() ?: "User"
-    val email: String = encryptedPrefsManager.getGoogleEmail() ?: "user@example.com"
-    
-    // Store or read the signup month and year on first account display
-    val memberSince: String = encryptedPrefsManager.getMemberSince() ?: run {
-        val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-        val formatted = dateFormat.format(Date())
-        encryptedPrefsManager.saveMemberSince(formatted)
-        formatted
-    }
+    private val _uiState = MutableStateFlow(AccountUiState())
+    val uiState: StateFlow<AccountUiState> = _uiState.asStateFlow()
 
     private val _signOutState = MutableStateFlow<UiState>(UiState.Idle)
     val signOutState: StateFlow<UiState> = _signOutState.asStateFlow()
 
-    /**
-     * Exposes total completed sessions count computed reactively from history logs.
-     * Why: Separates concerns by projecting database domain logs into UI-specific stats.
-     */
-    val totalSessions: StateFlow<Int> = getSessionHistoryUseCase()
-        .map { sessions ->
-            sessions.count { it.status == SessionStatus.COMPLETED }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0
-        )
+    private var currentLoadedUserId: String? = null
+    private var statsJob: kotlinx.coroutines.Job? = null
+
+    init {
+        refreshData()
+    }
 
     /**
-     * Exposes formatted focus hours and minutes computed from completed focus sessions.
-     * Why: Aggregates millisecond durations and maps to "14h 20m" layout representation.
+     * Refreshes user details and sets up/resets stats stream when user context changes.
+     * Why: Correctly updates display details and aggregates metrics on a per-user basis.
      */
-    val totalTimeLocked: StateFlow<String> = getSessionHistoryUseCase()
-        .map { sessions ->
-            val totalMs = sessions.filter { it.status == SessionStatus.COMPLETED }
-                .sumOf { (it.actualEndTime ?: it.targetEndTime) - it.startTime }
-            formatDuration(totalMs)
+    fun refreshData() {
+        val userId = encryptedPrefsManager.getUserId() ?: "default_user"
+        val name = encryptedPrefsManager.getGoogleDisplayName() ?: "User"
+        val userEmail = encryptedPrefsManager.getGoogleEmail() ?: "user@example.com"
+        val since = encryptedPrefsManager.getMemberSince() ?: run {
+            val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+            val formatted = dateFormat.format(Date())
+            encryptedPrefsManager.saveMemberSince(formatted)
+            formatted
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = "0h 0m"
-        )
 
-    /**
-     * Exposes the current consecutive daily focus streak count.
-     * Why: Connects to streak calculation logic to display inside metrics cards.
-     */
-    val currentStreak: StateFlow<Int> = getStreakUseCase()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = 0
-        )
+        _uiState.update {
+            it.copy(
+                displayName = name,
+                email = userEmail,
+                memberSince = since
+            )
+        }
+
+        if (userId != currentLoadedUserId) {
+            statsJob?.cancel()
+            currentLoadedUserId = userId
+
+            statsJob = viewModelScope.launch {
+                combine(
+                    getSessionHistoryUseCase(),
+                    getStreakUseCase()
+                ) { sessions, streak ->
+                    val userSessions = sessions.filter { it.userId == userId }
+                    val completedCount = userSessions.count { it.status == SessionStatus.COMPLETED }
+                    val totalMs = userSessions.filter { it.status == SessionStatus.COMPLETED }
+                        .sumOf { (it.actualEndTime ?: it.targetEndTime) - it.startTime }
+
+                    AccountUiState(
+                        displayName = name,
+                        email = userEmail,
+                        memberSince = since,
+                        totalSessions = completedCount,
+                        totalTimeLocked = formatDuration(totalMs),
+                        currentStreak = streak
+                    )
+                }.collectLatest { updatedState ->
+                    _uiState.value = updatedState
+                }
+            }
+        }
+    }
 
     /**
      * Signs out the user, clearing JWT, display details, auto-topup config and signals navigation flow.

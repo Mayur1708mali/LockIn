@@ -37,6 +37,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -101,10 +102,13 @@ fun AccountScreen(
     onSignOutComplete: () -> Unit,
     viewModel: AccountViewModel = viewModel()
 ) {
-    val totalSessions by viewModel.totalSessions.collectAsState()
-    val totalTimeLocked by viewModel.totalTimeLocked.collectAsState()
-    val currentStreak by viewModel.currentStreak.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val signOutState by viewModel.signOutState.collectAsState()
+
+    // Refresh state from preferences/database whenever account screen becomes active
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
+    }
 
     var showSignOutDialog by remember { mutableStateOf(false) }
 
@@ -151,7 +155,7 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // Centered Profile Section
-                val initial = viewModel.displayName.firstOrNull()?.uppercaseChar() ?: 'U'
+                val initial = uiState.displayName.firstOrNull()?.uppercaseChar() ?: 'U'
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -169,7 +173,7 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = viewModel.displayName,
+                    text = uiState.displayName,
                     color = Color.White,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
@@ -179,7 +183,7 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = viewModel.email,
+                    text = uiState.email,
                     color = Color(0xFF8E8E93), // Muted On-Surface Color
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
@@ -188,7 +192,7 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = stringResource(id = R.string.account_member_since, viewModel.memberSince),
+                    text = stringResource(id = R.string.account_member_since, uiState.memberSince),
                     color = Color(0xFF8E8E93), // Muted On-Surface Color
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center
@@ -203,17 +207,17 @@ fun AccountScreen(
                 ) {
                     StatCard(
                         label = stringResource(id = R.string.account_stat_sessions),
-                        value = totalSessions.toString(),
+                        value = uiState.totalSessions.toString(),
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         label = stringResource(id = R.string.account_stat_time),
-                        value = totalTimeLocked,
+                        value = uiState.totalTimeLocked,
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
                         label = stringResource(id = R.string.account_stat_streak),
-                        value = "$currentStreak ${if (currentStreak == 1) "DAY" else "DAYS"}",
+                        value = "${uiState.currentStreak} ${if (uiState.currentStreak == 1) "DAY" else "DAYS"}",
                         modifier = Modifier.weight(1f)
                     )
                 }

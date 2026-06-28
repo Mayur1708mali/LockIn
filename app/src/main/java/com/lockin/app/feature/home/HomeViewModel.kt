@@ -73,14 +73,19 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private var currentLoadedUserId: String? = null
+    private var walletCollectionJob: kotlinx.coroutines.Job? = null
+    private var streakCollectionJob: kotlinx.coroutines.Job? = null
+
     init {
         loadDashboardData()
     }
 
     /**
      * Initializes state bindings, streaming wallet updates, streak changes, and reading secure configs.
+     * Made public to allow refresh from composition when user session/context switches.
      */
-    private fun loadDashboardData() {
+    fun loadDashboardData() {
         val userId = encryptedPrefsManager.getUserId() ?: "default_user"
         val isRooted = encryptedPrefsManager.isDeviceRooted()
         val autoTopUpConfig = getAutoTopUpConfigUseCase()
@@ -118,26 +123,33 @@ class HomeViewModel @Inject constructor(
             }
         }
 
-        // Stream reactive changes from Room database for the user wallet balance
-        viewModelScope.launch {
-            getWalletUseCase(userId).collectLatest { wallet ->
-                _uiState.update {
-                    it.copy(
-                        wallet = wallet,
-                        isWalletLoading = false
-                    )
+        if (userId != currentLoadedUserId) {
+            walletCollectionJob?.cancel()
+            streakCollectionJob?.cancel()
+            currentLoadedUserId = userId
+
+            // Stream reactive changes from Room database for the user wallet balance
+            walletCollectionJob = viewModelScope.launch {
+                _uiState.update { it.copy(isWalletLoading = true) }
+                getWalletUseCase(userId).collectLatest { wallet ->
+                    _uiState.update {
+                        it.copy(
+                            wallet = wallet,
+                            isWalletLoading = false
+                        )
+                    }
                 }
             }
-        }
 
-        // Stream daily completion streaks reactively
-        viewModelScope.launch {
-            try {
-                getStreakUseCase().collectLatest { streak ->
-                    _uiState.update { it.copy(streakCount = streak) }
+            // Stream daily completion streaks reactively
+            streakCollectionJob = viewModelScope.launch {
+                try {
+                    getStreakUseCase().collectLatest { streak ->
+                        _uiState.update { it.copy(streakCount = streak) }
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to observe daily completion streak flow")
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to observe daily completion streak flow")
             }
         }
     }

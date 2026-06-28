@@ -108,6 +108,11 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Refresh state from preferences/database whenever dashboard becomes active
+    LaunchedEffect(Unit) {
+        viewModel.loadDashboardData()
+    }
+
     // Trigger navigation on session startup success
     LaunchedEffect(uiState.startSessionSuccessId) {
         val successId = uiState.startSessionSuccessId

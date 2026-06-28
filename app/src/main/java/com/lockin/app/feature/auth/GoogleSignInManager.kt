@@ -6,6 +6,7 @@
 package com.lockin.app.feature.auth
 
 import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
@@ -42,7 +43,7 @@ class GoogleSignInManager @Inject constructor(
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(false)
                 .setServerClientId(com.lockin.app.BuildConfig.GOOGLE_CLIENT_ID)
-                .setAutoSelectEnabled(true)
+                .setAutoSelectEnabled(false) // Disable auto-select to force prompt picker on sign-in attempts
                 .build()
 
             val request = GetCredentialRequest.Builder()
@@ -59,6 +60,20 @@ class GoogleSignInManager @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "GoogleSignInManager: Google Sign-In failed.")
             Result.failure(e)
+        }
+    }
+
+    /**
+     * Clears the credential state to signal to credential providers that the user explicitly signed out.
+     * Why: Prevents Credential Manager from caching credentials and bypassing account choice on subsequent sign-in.
+     */
+    suspend fun clearSession() {
+        try {
+            val request = ClearCredentialStateRequest()
+            credentialManager.clearCredentialState(request)
+            Timber.i("GoogleSignInManager: Successfully cleared credential state.")
+        } catch (e: Exception) {
+            Timber.e(e, "GoogleSignInManager: Failed to clear credential state.")
         }
     }
 

@@ -94,6 +94,11 @@ fun WalletScreen(
     val activity = context as? FragmentActivity
     val uiState by viewModel.uiState.collectAsState()
 
+    // Refresh wallet dashboard state from DB whenever screen becomes active
+    LaunchedEffect(Unit) {
+        viewModel.loadWalletDashboard()
+    }
+
     var showAddMoneySheet by remember { mutableStateOf(false) }
     var showWithdrawSheet by remember { mutableStateOf(false) }
     var showMockPaymentDialog by remember { mutableStateOf(false) }

@@ -1,5 +1,5 @@
 /*
- * File: com/lockin/app/navigation/LockInNavigation.kt
+ * File: app/src/main/java/com/lockin/app/navigation/LockInNavigation.kt
  * Purpose: Top-level navigation coordinator that displays a loading screen
  * while determining the startup destination, then builds the NavDisplay with LockInNavGraph.
  */
@@ -40,12 +40,21 @@ fun LockInNavigation(
         }
         is LaunchState.Destination -> {
             val backStack = rememberNavBackStack(state.route)
+            val context = androidx.compose.ui.platform.LocalContext.current
             
             // Handle session expiration or unauthorized response from backend
+            // Why: Listens to global AuthEventBus to clear backstack and perform a clean activity restart with flags to clear saved backstack state.
             androidx.compose.runtime.LaunchedEffect(Unit) {
                 com.lockin.app.core.util.AuthEventBus.unauthorizedEvent.collect {
                     backStack.clear()
                     backStack.add(LockInRoute.Onboarding)
+                    
+                    // Restart Activity with FLAG_ACTIVITY_NEW_TASK and FLAG_ACTIVITY_CLEAR_TASK.
+                    // This creates a brand new activity task, destroying all viewmodels and preventing saved state restoration.
+                    val intent = android.content.Intent(context, com.lockin.app.MainActivity::class.java).apply {
+                        flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    context.startActivity(intent)
                 }
             }
 

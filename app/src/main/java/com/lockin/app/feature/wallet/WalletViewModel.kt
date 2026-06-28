@@ -68,37 +68,50 @@ class WalletViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(WalletUiState())
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
+    private var currentLoadedUserId: String? = null
+    private var walletCollectionJob: kotlinx.coroutines.Job? = null
+    private var transactionsCollectionJob: kotlinx.coroutines.Job? = null
+
     init {
         loadWalletDashboard()
     }
 
     /**
      * Connects reactive data streams from DB for the user's wallet metrics and transaction lists.
+     * Made public to allow refresh from composition when user context changes.
      */
-    private fun loadWalletDashboard() {
+    fun loadWalletDashboard() {
         val userId = encryptedPrefsManager.getUserId() ?: "default_user"
         Timber.d("Loading Wallet data stream for userId: $userId")
 
-        // 1. Observe active Wallet balances
-        viewModelScope.launch {
-            getWalletUseCase(userId).collectLatest { wallet ->
-                _uiState.update {
-                    it.copy(
-                        wallet = wallet,
-                        isWalletLoading = false
-                    )
+        if (userId != currentLoadedUserId) {
+            walletCollectionJob?.cancel()
+            transactionsCollectionJob?.cancel()
+            currentLoadedUserId = userId
+
+            // 1. Observe active Wallet balances
+            walletCollectionJob = viewModelScope.launch {
+                _uiState.update { it.copy(isWalletLoading = true) }
+                getWalletUseCase(userId).collectLatest { wallet ->
+                    _uiState.update {
+                        it.copy(
+                            wallet = wallet,
+                            isWalletLoading = false
+                        )
+                    }
                 }
             }
-        }
 
-        // 2. Observe all historical Wallet transactions
-        viewModelScope.launch {
-            getTransactionHistoryUseCase().collectLatest { txs ->
-                _uiState.update {
-                    it.copy(
-                        transactions = txs,
-                        isTransactionsLoading = false
-                    )
+            // 2. Observe all historical Wallet transactions
+            transactionsCollectionJob = viewModelScope.launch {
+                _uiState.update { it.copy(isTransactionsLoading = true) }
+                getTransactionHistoryUseCase().collectLatest { txs ->
+                    _uiState.update {
+                        it.copy(
+                            transactions = txs,
+                            isTransactionsLoading = false
+                        )
+                    }
                 }
             }
         }

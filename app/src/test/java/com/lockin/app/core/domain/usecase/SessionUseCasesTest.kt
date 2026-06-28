@@ -29,6 +29,7 @@ class SessionUseCasesTest {
 
     private lateinit var sessionRepository: SessionRepository
     private lateinit var walletRepository: WalletRepository
+    private lateinit var encryptedPrefsManager: com.lockin.app.core.security.EncryptedPrefsManager
 
     private lateinit var startSessionUseCase: StartSessionUseCase
     private lateinit var completeSessionUseCase: CompleteSessionUseCase
@@ -55,13 +56,15 @@ class SessionUseCasesTest {
     fun setUp() {
         sessionRepository = mockk(relaxed = true)
         walletRepository = mockk(relaxed = true)
+        encryptedPrefsManager = mockk(relaxed = true)
+        every { encryptedPrefsManager.getUserId() } returns userId
 
         startSessionUseCase = StartSessionUseCase(sessionRepository, walletRepository)
         completeSessionUseCase = CompleteSessionUseCase(sessionRepository, walletRepository)
         breakSessionUseCase = BreakSessionUseCase(sessionRepository, walletRepository)
         getActiveSessionUseCase = GetActiveSessionUseCase(sessionRepository)
-        getSessionHistoryUseCase = GetSessionHistoryUseCase(sessionRepository)
-        getStreakUseCase = GetStreakUseCase(sessionRepository)
+        getSessionHistoryUseCase = GetSessionHistoryUseCase(sessionRepository, encryptedPrefsManager)
+        getStreakUseCase = GetStreakUseCase(sessionRepository, encryptedPrefsManager)
         logSessionEventUseCase = LogSessionEventUseCase(sessionRepository)
     }
 

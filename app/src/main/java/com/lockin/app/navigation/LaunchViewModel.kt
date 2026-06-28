@@ -1,5 +1,5 @@
 /*
- * File: com/lockin/app/navigation/LaunchViewModel.kt
+ * File: app/src/main/java/com/lockin/app/navigation/LaunchViewModel.kt
  * Purpose: ViewModel for app startup launch routing.
  * Evaluates the startup destination based on active sessions and wallet balance.
  */
