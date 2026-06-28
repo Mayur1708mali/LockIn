@@ -68,14 +68,22 @@ class GoogleSignInManager @Inject constructor(
      */
     private fun handleCredential(result: GetCredentialResponse): Result<String> {
         val credential = result.credential
-        return if (credential is GoogleIdTokenCredential) {
-            val idToken = credential.idToken
-            Timber.d("GoogleSignInManager: Successfully extracted Google ID token.")
-            Result.success(idToken)
-        } else {
-            val errorMsg = "Unsupported credential returned: ${credential.type}"
-            Timber.e("GoogleSignInManager: $errorMsg")
-            Result.failure(Exception(errorMsg))
+        return try {
+            if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                Timber.d("GoogleSignInManager: Successfully extracted Google ID token via type matching.")
+                Result.success(googleIdTokenCredential.idToken)
+            } else if (credential is GoogleIdTokenCredential) {
+                Timber.d("GoogleSignInManager: Successfully extracted Google ID token via class matching.")
+                Result.success(credential.idToken)
+            } else {
+                val errorMsg = "Unsupported credential returned: ${credential.type}"
+                Timber.e("GoogleSignInManager: $errorMsg")
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "GoogleSignInManager: Exception while parsing Google ID token credential.")
+            Result.failure(e)
         }
     }
 }
