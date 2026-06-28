@@ -1,5 +1,5 @@
 /*
- * File: com/lockin/app/navigation/LockInNavGraph.kt
+ * File: app/src/main/java/com/lockin/app/navigation/LockInNavGraph.kt
  * Purpose: Navigation Graph definition for LockIn using Navigation 3.
  * Defines the mapping from each LockInRoute key to its corresponding Composable screen.
  */
@@ -26,6 +26,7 @@ import com.lockin.app.feature.session.SessionCompleteScreen
 import com.lockin.app.feature.wallet.WalletScreen
 import com.lockin.app.feature.settings.SettingsScreen
 import com.lockin.app.feature.history.HistoryScreen
+import com.lockin.app.feature.account.AccountScreen
 import timber.log.Timber
 
 /**
@@ -77,6 +78,9 @@ fun LockInNavGraph(
                     },
                     onNavigateToWallet = {
                         backStack.add(LockInRoute.Wallet(openWithdrawalSheet = false))
+                    },
+                    onNavigateToAccount = {
+                        backStack.add(LockInRoute.Account)
                     }
                 )
             }
@@ -157,6 +161,17 @@ fun LockInNavGraph(
                 SettingsScreen(
                     onNavigateBack = {
                         backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<LockInRoute.Account> {
+                AccountScreen(
+                    onNavigateBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onSignOutComplete = {
+                        backStack.clear()
+                        backStack.add(LockInRoute.Onboarding)
                     }
                 )
             }

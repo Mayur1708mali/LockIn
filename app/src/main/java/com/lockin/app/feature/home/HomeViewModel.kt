@@ -1,5 +1,5 @@
 /*
- * File: com/lockin/app/feature/home/HomeViewModel.kt
+ * File: app/src/main/java/com/lockin/app/feature/home/HomeViewModel.kt
  * Purpose: ViewModel for the Home dashboard.
  * Manages balance display, streak tracking, duration and penalty pickers,
  * and starts new focus sessions, handling silent Auto Top-Up triggers if needed.
@@ -10,6 +10,7 @@ package com.lockin.app.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lockin.app.core.domain.model.Wallet
+import com.lockin.app.core.domain.repository.WalletRepository
 import com.lockin.app.core.domain.usecase.AutoTopUpUseCase
 import com.lockin.app.core.domain.usecase.GetAutoTopUpConfigUseCase
 import com.lockin.app.core.domain.usecase.GetStreakUseCase
@@ -39,6 +40,7 @@ import javax.inject.Inject
  * @param isStartSessionProcessing True when the session startup transaction or auto top-up is executing.
  * @param startSessionError Diagnostic error message if starting the session fails.
  * @param startSessionSuccessId The successfully created focus session ID to trigger navigation.
+ * @param googleDisplayName User's Google sign-in display name cached locally.
  */
 data class HomeUiState(
     val wallet: Wallet? = null,
@@ -50,7 +52,8 @@ data class HomeUiState(
     val selectedPenaltyPaise: Int = 10000,
     val isStartSessionProcessing: Boolean = false,
     val startSessionError: String? = null,
-    val startSessionSuccessId: String? = null
+    val startSessionSuccessId: String? = null,
+    val googleDisplayName: String = "User"
 )
 
 /**
@@ -63,7 +66,8 @@ class HomeViewModel @Inject constructor(
     private val getAutoTopUpConfigUseCase: GetAutoTopUpConfigUseCase,
     private val startSessionUseCase: StartSessionUseCase,
     private val autoTopUpUseCase: AutoTopUpUseCase,
-    private val encryptedPrefsManager: EncryptedPrefsManager
+    private val encryptedPrefsManager: EncryptedPrefsManager,
+    private val walletRepository: WalletRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -80,12 +84,38 @@ class HomeViewModel @Inject constructor(
         val userId = encryptedPrefsManager.getUserId() ?: "default_user"
         val isRooted = encryptedPrefsManager.isDeviceRooted()
         val autoTopUpConfig = getAutoTopUpConfigUseCase()
+        val displayName = encryptedPrefsManager.getGoogleDisplayName() ?: "User"
 
         _uiState.update {
             it.copy(
                 isDeviceRooted = isRooted,
-                isAutoTopUpEnabled = autoTopUpConfig.autoTopUpEnabled
+                isAutoTopUpEnabled = autoTopUpConfig.autoTopUpEnabled,
+                googleDisplayName = displayName
             )
+        }
+
+        // Ensure user wallet exists in local database, otherwise initialize it with ₹500 starting balance
+        viewModelScope.launch {
+            try {
+                val wallet = walletRepository.getWallet(userId)
+                if (wallet == null) {
+                    val newWallet = Wallet(
+                        userId = userId,
+                        availableBalance = 50000, // ₹500 starting balance for developer/emulator testing
+                        heldBalance = 0,
+                        totalDeposited = 50000,
+                        totalPenaltiesPaid = 0,
+                        autoTopUpEnabled = autoTopUpConfig.autoTopUpEnabled,
+                        autoTopUpThresholdPaise = autoTopUpConfig.autoTopUpThresholdPaise,
+                        autoTopUpAmountPaise = autoTopUpConfig.autoTopUpAmountPaise,
+                        lastUpdated = System.currentTimeMillis()
+                    )
+                    walletRepository.insertOrUpdateWallet(newWallet)
+                    Timber.d("HomeViewModel: Initialized default wallet with ₹500 for user: $userId")
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "HomeViewModel: Failed to initialize default wallet.")
+            }
         }
 
         // Stream reactive changes from Room database for the user wallet balance

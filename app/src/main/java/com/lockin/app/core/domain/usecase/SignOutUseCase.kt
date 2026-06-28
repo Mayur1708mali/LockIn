@@ -5,32 +5,30 @@
 
 package com.lockin.app.core.domain.usecase
 
-import com.lockin.app.core.data.local.LockInDatabase
 import com.lockin.app.core.security.EncryptedPrefsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * Handles clearing all user credentials, security tokens, and local database entries during sign-out.
- * Why: Restores the application to a clean onboarding state and protects user data.
+ * Handles clearing all user credentials, display details, auto top-up configs and security tokens during sign-out.
+ * Why: Restores the application to a clean onboarding state and protects user data while preserving database history.
  */
 class SignOutUseCase @Inject constructor(
-    private val encryptedPrefsManager: EncryptedPrefsManager,
-    private val database: LockInDatabase
+    private val encryptedPrefsManager: EncryptedPrefsManager
 ) {
 
     /**
-     * Clear auth preferences and database tables.
-     * Why: Enforces complete local data reset upon leaving focus mode.
+     * Clear auth preferences, display name, email, and auto top-up configurations.
+     * Why: Enforces security cleanup without destroying local session or transaction histories.
      */
     suspend operator fun invoke() {
         withContext(Dispatchers.IO) {
-            // 1. Reset user identifier and auth tokens
+            // 1. Reset user identifier, auth tokens, display name, email, and onboarding completion
             encryptedPrefsManager.clearAuth()
 
-            // 2. Erase local tables (sessions, transactions, wallet configuration)
-            database.clearAllTables()
+            // 2. Clear auto top-up preferences and saved payment instruments
+            encryptedPrefsManager.clearAutoTopUpConfig()
         }
     }
 }

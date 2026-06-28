@@ -22,4 +22,18 @@
     <string name="notification_auto_topup_failure_body">Auto top-up failed. Add money manually.</string>
     <string name="notification_daily_cap_title">Daily Top-Up Limit Reached</string>
     <string name="notification_daily_cap_body">Daily top-up limit reached.</string>
+
+    <!-- Account Screen -->
+    <string name="account_title">ACCOUNT</string>
+    <string name="account_member_since">Member since %1$s</string>
+    <string name="account_stat_sessions">SESSIONS</string>
+    <string name="account_stat_time">TIME LOCKED</string>
+    <string name="account_stat_streak">STREAK</string>
+    <string name="account_sign_out">Sign Out</string>
+
+    <!-- Sign Out Confirmation Dialog -->
+    <string name="sign_out_dialog_title">Sign out of LockIn?</string>
+    <string name="sign_out_dialog_message">Your wallet balance and session history stay safe. You can sign back in anytime.</string>
+    <string name="sign_out_dialog_cancel">Cancel</string>
+    <string name="sign_out_dialog_confirm">Sign Out</string>
 </resources>

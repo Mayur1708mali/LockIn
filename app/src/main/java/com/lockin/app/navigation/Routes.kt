@@ -1,5 +1,5 @@
 /*
- * File: com/lockin/app/navigation/Routes.kt
+ * File: app/src/main/java/com/lockin/app/navigation/Routes.kt
  * Purpose: Sealed interface defining the type-safe routes (navigation keys)
  * for the LockIn application using Jetpack Navigation 3 and Kotlin Serialization.
  */
@@ -78,4 +78,10 @@ sealed interface LockInRoute : NavKey {
      */
     @Serializable
     data object Settings : LockInRoute
+
+    /**
+     * Route for the Account details screen.
+     */
+    @Serializable
+    data object Account : LockInRoute
 }

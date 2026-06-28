@@ -1,5 +1,5 @@
 /*
- * File: com/lockin/app/feature/home/HomeScreen.kt
+ * File: app/src/main/java/com/lockin/app/feature/home/HomeScreen.kt
  * Purpose: Main dashboard layout for the LockIn application.
  * Integrates wallet badges, preset configuration pickers, allowlist previews,
  * streak metrics cards, root detection alerts, and triggers focus session startups.
@@ -93,6 +93,7 @@ private val WarningIcon: ImageVector
  * @param onNavigateToActiveSession Callback to navigate to ActiveSession (sends ID, duration, penalty).
  * @param onNavigateToSettings Callback to open the settings screen.
  * @param onNavigateToWallet Callback to open the wallet screen.
+ * @param onNavigateToAccount Callback to open the account screen.
  * @param modifier Layout modifiers.
  * @param viewModel Injected viewmodel for state operations.
  */
@@ -101,6 +102,7 @@ fun HomeScreen(
     onNavigateToActiveSession: (sessionId: String, durationSeconds: Long, penaltyAmountPaise: Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToWallet: () -> Unit,
+    onNavigateToAccount: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel()
 ) {
@@ -126,8 +128,10 @@ fun HomeScreen(
             HomeTopBar(
                 availableBalancePaise = uiState.wallet?.availableBalance ?: 0,
                 autoTopUpEnabled = uiState.isAutoTopUpEnabled,
+                googleDisplayName = uiState.googleDisplayName,
                 onWalletBadgeClick = onNavigateToWallet,
-                onSettingsClick = onNavigateToSettings
+                onSettingsClick = onNavigateToSettings,
+                onAccountClick = onNavigateToAccount
             )
         }
     ) { innerPadding ->
@@ -214,14 +218,16 @@ fun HomeScreen(
 }
 
 /**
- * Custom dashboard top bar displaying app logo and wallet badge metrics.
+ * Custom dashboard top bar displaying app logo, wallet badge, and user avatar.
  */
 @Composable
 private fun HomeTopBar(
     availableBalancePaise: Int,
     autoTopUpEnabled: Boolean,
+    googleDisplayName: String,
     onWalletBadgeClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onAccountClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -239,11 +245,33 @@ private fun HomeTopBar(
             modifier = Modifier.clickable { onSettingsClick() }
         )
 
-        WalletBadge(
-            balancePaise = availableBalancePaise, // Corrected from availableBalance to balancePaise
-            autoTopUpEnabled = autoTopUpEnabled,
-            modifier = Modifier.clickable { onWalletBadgeClick() }
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            WalletBadge(
+                balancePaise = availableBalancePaise,
+                autoTopUpEnabled = autoTopUpEnabled,
+                modifier = Modifier.clickable { onWalletBadgeClick() }
+            )
+
+            // Small circular avatar (first letter of name, 32dp, red background)
+            val initial = googleDisplayName.firstOrNull()?.uppercaseChar() ?: 'U'
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(Color(0xFFFF3B30), shape = androidx.compose.foundation.shape.CircleShape)
+                    .clickable { onAccountClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = initial.toString(),
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
     }
 }
 

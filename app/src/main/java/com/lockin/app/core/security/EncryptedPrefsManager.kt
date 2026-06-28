@@ -53,6 +53,7 @@ class EncryptedPrefsManager @Inject constructor(
         private const val KEY_FCM_TOKEN = "key_fcm_token"
         private const val KEY_GOOGLE_DISPLAY_NAME = "google_display_name"
         private const val KEY_GOOGLE_EMAIL = "google_email"
+        private const val KEY_MEMBER_SINCE = "member_since"
     }
 
     /**
@@ -181,6 +182,35 @@ class EncryptedPrefsManager @Inject constructor(
             .remove(KEY_GOOGLE_DISPLAY_NAME)
             .remove(KEY_GOOGLE_EMAIL)
             .remove(KEY_ONBOARDING_COMPLETE)
+            .remove(KEY_MEMBER_SINCE)
+            .apply()
+    }
+
+    /**
+     * Saves the user's signup/member since date.
+     */
+    fun saveMemberSince(date: String) {
+        sharedPreferences.edit().putString(KEY_MEMBER_SINCE, date).apply()
+    }
+
+    /**
+     * Retrieves the user's signup/member since date.
+     */
+    fun getMemberSince(): String? {
+        return sharedPreferences.getString(KEY_MEMBER_SINCE, null)
+    }
+
+    /**
+     * Clears the auto top-up configuration from secure storage.
+     * Why: Required to clean up payment configs upon user sign-out.
+     */
+    fun clearAutoTopUpConfig() {
+        sharedPreferences.edit()
+            .remove(KEY_AUTO_TOPUP_ENABLED)
+            .remove(KEY_AUTO_TOPUP_THRESHOLD)
+            .remove(KEY_AUTO_TOPUP_AMOUNT)
+            .remove(KEY_PAYMENT_METHOD_LABEL)
+            .remove(KEY_RAZORPAY_TOKEN)
             .apply()
     }
 
