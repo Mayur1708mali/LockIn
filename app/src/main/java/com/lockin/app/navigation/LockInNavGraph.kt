@@ -31,6 +31,7 @@ import timber.log.Timber
 /**
  * Renders the Navigation display for LockIn based on the current back stack.
  * Maps each serialized [LockInRoute] to its screen UI.
+ * Integrates Google Sign-In as Step 0 of Onboarding and supports global redirection upon sign out/session expiration.
  * Temporary placeholder screens are supplied so the app compiles while UI screens are being built.
  *
  * @param backStack The Navigation 3 back stack tracking current destination state.

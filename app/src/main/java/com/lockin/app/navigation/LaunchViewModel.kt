@@ -75,15 +75,16 @@ class LaunchViewModel @Inject constructor(
                     return@launch
                 }
 
-                // 2. If no active session, check if onboarding has been completed.
-                if (encryptedPrefsManager.isOnboardingComplete()) {
-                    Timber.d("Launch logic: Onboarding complete. Directing to Home.")
+                // 2. If the user is already signed in (JWT exists and is valid), go straight to Home.
+                val jwt = encryptedPrefsManager.getAuthJwt()
+                if (!jwt.isNullOrEmpty()) {
+                    Timber.d("Launch logic: User signed in with valid JWT. Directing to Home.")
                     _launchState.value = LaunchState.Destination(LockInRoute.Home)
                     return@launch
                 }
 
                 // 3. Otherwise, route the user to the Onboarding screen.
-                Timber.d("Launch logic: No active session or wallet balance. Directing to Onboarding.")
+                Timber.d("Launch logic: No active session or valid JWT. Directing to Onboarding.")
                 _launchState.value = LaunchState.Destination(LockInRoute.Onboarding)
 
             } catch (e: Exception) {

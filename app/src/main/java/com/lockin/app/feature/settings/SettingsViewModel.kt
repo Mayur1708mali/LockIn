@@ -77,11 +77,28 @@ class SettingsViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val walletRepository: WalletRepository,
     private val encryptedPrefsManager: EncryptedPrefsManager,
-    private val razorpayManager: RazorpayManager
+    private val razorpayManager: RazorpayManager,
+    private val signOutUseCase: com.lockin.app.core.domain.usecase.SignOutUseCase
 ) : ViewModel() {
 
     private val userId = encryptedPrefsManager.getUserId() ?: "default_user"
     private val _installedApps = MutableStateFlow<List<InstalledAppInfo>>(emptyList())
+
+    /**
+     * Signs out the user, clearing local credentials and databases, then redirecting to onboarding.
+     */
+    fun signOut(onComplete: () -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                signOutUseCase()
+                com.lockin.app.core.util.AuthEventBus.postUnauthorized()
+                onComplete()
+                Timber.i("SettingsViewModel: User signed out successfully.")
+            } catch (e: java.lang.Exception) {
+                Timber.e(e, "SettingsViewModel: Failed to execute sign out.")
+            }
+        }
+    }
 
     // Combine all domain streams to formulate a reactive UI state
     val uiState: StateFlow<SettingsUiState> = combine(

@@ -19,6 +19,7 @@ if (localPropertiesFile.exists()) {
 val razorpayKeyTest = localProperties.getProperty("RAZORPAY_KEY_TEST") ?: "rzp_test_placeholder"
 val razorpayKeyLive = localProperties.getProperty("RAZORPAY_KEY_LIVE") ?: "rzp_live_placeholder"
 val baseUrl = localProperties.getProperty("BASE_URL") ?: "http://10.0.2.2:8080/api/"
+val googleWebClientId = localProperties.getProperty("GOOGLE_WEB_CLIENT_ID") ?: "795291263970-placeholder.apps.googleusercontent.com"
 
 android {
     namespace = "com.lockin.app"
@@ -29,6 +30,8 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
     buildTypes {
@@ -150,4 +153,9 @@ dependencies {
   // Hilt WorkManager Integration
   implementation(libs.androidx.hilt.work)
   ksp(libs.androidx.hilt.compiler)
+
+  // Google Credentials & Identity for Google Sign-in
+  implementation(libs.androidx.credentials)
+  implementation(libs.androidx.credentials.play.services)
+  implementation(libs.googleid)
 }

@@ -29,7 +29,7 @@ class AuthInterceptor @Inject constructor(
      */
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
-        val token = encryptedPrefsManager.getAuthToken()
+        val token = encryptedPrefsManager.getAuthJwt()
 
         // If a valid JWT token is stored, rewrite the request headers to include it
         val authenticatedRequest = if (!token.isNullOrEmpty()) {
@@ -40,6 +40,14 @@ class AuthInterceptor @Inject constructor(
             originalRequest
         }
 
-        return chain.proceed(authenticatedRequest)
+        val response = chain.proceed(authenticatedRequest)
+        
+        // If server returns 401 Unauthorized, clear security preferences and redirect
+        if (response.code == 401) {
+            encryptedPrefsManager.clearAuth()
+            com.lockin.app.core.util.AuthEventBus.postUnauthorized()
+        }
+
+        return response
     }
 }

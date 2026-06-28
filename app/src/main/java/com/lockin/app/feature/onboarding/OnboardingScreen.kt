@@ -1,7 +1,7 @@
 /*
  * File: com/lockin/app/feature/onboarding/OnboardingScreen.kt
- * Purpose: Onboarding screen composed of a 7-step wizard layout with progress indicators,
- * permission dialog launchers (VPN, Notifications), mock payment simulator, and auto top-up toggles.
+ * Purpose: Onboarding screen composed of an 8-step wizard layout (0-7) with progress indicators,
+ * Google Sign-In gate, permission dialog launchers (VPN, Notifications), mock payment simulator, and auto top-up toggles.
  */
 
 package com.lockin.app.feature.onboarding
@@ -66,7 +66,7 @@ import com.lockin.app.ui.components.SectionHeader
 import timber.log.Timber
 
 /**
- * Onboarding screen root container. Enforces 7-step wizard layout and collects states.
+ * Onboarding screen root container. Enforces 8-step wizard layout and collects states.
  *
  * @param onComplete Callback invoked when onboarding configurations are saved.
  * @param viewModel Injected OnboardingViewModel coordinating states.
@@ -121,7 +121,7 @@ fun OnboardingScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // 1. Progress indicators at the top
+            // 1. Progress indicators at the top (covers steps 0-7)
             OnboardingProgressIndicator(currentStep = uiState.currentStep)
 
             // 2. Animated step content switcher
@@ -138,6 +138,10 @@ fun OnboardingScreen(
                     }
                 ) { step ->
                     when (step) {
+                        0 -> StepGoogleSignIn(
+                            uiState = uiState,
+                            onSignInClick = { viewModel.signInWithGoogle(context) }
+                        )
                         1 -> StepConcept(onNext = { viewModel.nextStep() })
                         2 -> StepWalletExplainer(onNext = { viewModel.nextStep() })
                         3 -> StepVpnPermission(
@@ -191,6 +195,7 @@ fun OnboardingScreen(
             }
 
             // 3. Back navigation button at the bottom fold
+            // Stops at Step 1, preventing user from returning to Google Sign-In screen (Step 0) once authenticated
             if (uiState.currentStep in 2..6 && uiState.currentStep != 5) {
                 LockInButton(
                     text = "Back",
@@ -201,13 +206,13 @@ fun OnboardingScreen(
             }
         }
 
-        // Global loading overlay during deposit update execution
-        LoadingOverlay(isLoading = uiState.isDepositProcessing)
+        // Global loading overlay during deposit update execution or Google authentication
+        LoadingOverlay(isLoading = uiState.isDepositProcessing || uiState.isGoogleSignInLoading)
     }
 }
 
 /**
- * Centered progress indicators showing dots for each step.
+ * Centered progress indicators showing dots for each step (0 to 7).
  */
 @Composable
 private fun OnboardingProgressIndicator(
@@ -221,7 +226,7 @@ private fun OnboardingProgressIndicator(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        for (i in 1..7) {
+        for (i in 0..7) {
             Box(
                 modifier = Modifier
                     .size(if (i == currentStep) 10.dp else 6.dp)
@@ -234,6 +239,49 @@ private fun OnboardingProgressIndicator(
                 Spacer(modifier = Modifier.width(12.dp))
             }
         }
+    }
+}
+
+/**
+ * Step 0: Google Sign-In Gate Screen.
+ */
+@Composable
+private fun StepGoogleSignIn(
+    uiState: OnboardingUiState,
+    onSignInClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        SectionHeader(label = "AUTHENTICATION", title = "YOUR IDENTITY, DETOX STAKES")
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "LockIn requires a Google Account to establish your secure detox wallet.\n\n" +
+                   "Your wallet holds session penalties securely. We do not store Google passwords or credentials on device.\n\n" +
+                   "Authentication is required to ensure account and wallet recovery.",
+            color = Color(0xFFF5F5F7), // OnSurface
+            style = MaterialTheme.typography.bodyLarge,
+            lineHeight = 24.sp
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+
+        if (uiState.googleSignInError != null) {
+            Text(
+                text = "Sign-In Error: ${uiState.googleSignInError}\nWhat to do: Check network connection and tap retry.",
+                color = Color(0xFFFF3B30), // Accent red
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+
+        LockInButton(
+            text = if (uiState.googleSignInError != null) "RETRY SIGN IN WITH GOOGLE" else "SIGN IN WITH GOOGLE",
+            onClick = onSignInClick,
+            enabled = !uiState.isGoogleSignInLoading
+        )
     }
 }
 

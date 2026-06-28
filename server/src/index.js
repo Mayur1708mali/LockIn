@@ -18,6 +18,7 @@ import { initFirebase } from './utils/fcm.js';
 import userRoutes from './routes/userRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import walletRoutes from './routes/walletRoutes.js';
+import authRoutes from './routes/auth.js';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -62,6 +63,7 @@ app.get('/health', (req, res) => {
 app.use('/users', userRoutes);
 app.use('/sessions', sessionRoutes);
 app.use('/wallet', walletRoutes);
+app.use('/auth', authRoutes);
 
 /**
  * Fallback route handler for unmatched routes.

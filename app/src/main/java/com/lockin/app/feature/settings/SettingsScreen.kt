@@ -87,6 +87,7 @@ fun SettingsScreen(
     var showAddAppSheet by remember { mutableStateOf(false) }
     var showPaymentVerificationDialog by remember { mutableStateOf(false) }
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    var showSignOutDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -256,6 +257,7 @@ fun SettingsScreen(
                                 AccountSection(
                                     userId = data.userId,
                                     isLocked = data.isSessionActive,
+                                    onSignOutClick = { showSignOutDialog = true },
                                     onDeleteAccountClick = { showDeleteAccountDialog = true }
                                 )
                             }
@@ -377,6 +379,55 @@ fun SettingsScreen(
                             dismissButton = {
                                 TextButton(
                                     onClick = { showDeleteAccountDialog = false }
+                                ) {
+                                    Text(
+                                        text = "CANCEL",
+                                        color = Color(0xFF8E8E93),
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            },
+                            containerColor = Color(0xFF1C1C1E),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                    }
+
+                    // Sign-out confirmation dialog
+                    if (showSignOutDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showSignOutDialog = false },
+                            title = {
+                                Text(
+                                    text = "SIGN OUT",
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = "Are you sure you want to sign out? This will clear your session and return to onboarding.",
+                                    color = Color(0xFF8E8E93)
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        showSignOutDialog = false
+                                        viewModel.signOut()
+                                    }
+                                ) {
+                                    Text(
+                                        text = "SIGN OUT",
+                                        color = Color(0xFFFF3B30),
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = { showSignOutDialog = false }
                                 ) {
                                     Text(
                                         text = "CANCEL",
@@ -749,13 +800,11 @@ private fun PaymentMethodSection(
     }
 }
 
-/**
- * Section displaying logged-in user identification and local account data teardowns.
- */
 @Composable
 private fun AccountSection(
     userId: String,
     isLocked: Boolean,
+    onSignOutClick: () -> Unit,
     onDeleteAccountClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -794,9 +843,18 @@ private fun AccountSection(
         Spacer(modifier = Modifier.height(12.dp))
 
         LockInButton(
+            text = "SIGN OUT",
+            onClick = onSignOutClick,
+            enabled = !isLocked
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LockInButton(
             text = "DELETE LOCAL ACCOUNT",
             onClick = onDeleteAccountClick,
-            enabled = !isLocked
+            enabled = !isLocked,
+            isSecondary = true
         )
     }
 }

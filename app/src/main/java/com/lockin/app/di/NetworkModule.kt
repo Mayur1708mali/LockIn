@@ -6,6 +6,7 @@
 package com.lockin.app.di
 
 import com.lockin.app.BuildConfig
+import com.lockin.app.core.data.remote.api.AuthApi
 import com.lockin.app.core.data.remote.api.SessionApi
 import com.lockin.app.core.data.remote.api.UserApi
 import com.lockin.app.core.data.remote.api.WalletApi
@@ -137,5 +138,20 @@ object NetworkModule {
         retrofit: Retrofit
     ): UserApi {
         return retrofit.create(UserApi::class.java)
+    }
+
+    /**
+     * Provides AuthApi Retrofit service instance.
+     * Why: Allows injecting authentication APIs for Google Sign-in verify flows.
+     *
+     * @param retrofit Central Retrofit instance.
+     * @return Ready-to-use AuthApi interface.
+     */
+    @Provides
+    @Singleton
+    fun provideAuthApi(
+        retrofit: Retrofit
+    ): AuthApi {
+        return retrofit.create(AuthApi::class.java)
     }
 }

@@ -40,6 +40,15 @@ fun LockInNavigation(
         }
         is LaunchState.Destination -> {
             val backStack = rememberNavBackStack(state.route)
+            
+            // Handle session expiration or unauthorized response from backend
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                com.lockin.app.core.util.AuthEventBus.unauthorizedEvent.collect {
+                    backStack.clear()
+                    backStack.add(LockInRoute.Onboarding)
+                }
+            }
+
             LockInNavGraph(backStack = backStack)
         }
     }

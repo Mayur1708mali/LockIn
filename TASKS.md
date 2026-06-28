@@ -21,6 +21,22 @@
 - [x] **0.12** Run first Antigravity agent session: type "Summarize the LockIn project from AGENTS.md" — verify it reads skills correctly
 
 
+## PHASE 0.5 — Google Authentication
+
+- [ ] **0.5.1** Add Credential Manager dependencies to build.gradle
+- [ ] **0.5.2** Create Google Cloud project, enable Google Sign-In API, get Web Client ID
+- [ ] **0.5.3** Add Web Client ID to local.properties (never commit to git)
+- [ ] **0.5.4** Create GoogleSignInManager.kt
+- [ ] **0.5.5** Create AuthApi.kt + AuthDto.kt
+- [ ] **0.5.6** Create SignInWithGoogleUseCase.kt + SignOutUseCase.kt
+- [ ] **0.5.7** Update OnboardingViewModel + OnboardingScreen with sign-in step
+- [ ] **0.5.8** Update AuthInterceptor to attach JWT
+- [ ] **0.5.9** Handle 401 globally — redirect to sign-in
+- [ ] **0.5.10** Backend: POST /auth/google endpoint
+- [ ] **0.5.11** Backend: JWT middleware for protected routes
+- [ ] **0.5.12** Test: sign in, check JWT saved, check user created in DB
+- [ ] **0.5.13** Test: sign out, check JWT cleared, wallet state reset
+
 ---
 
 ## PHASE 1 — Project Foundation

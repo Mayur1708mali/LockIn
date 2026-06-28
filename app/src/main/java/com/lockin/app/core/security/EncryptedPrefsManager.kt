@@ -42,6 +42,7 @@ class EncryptedPrefsManager @Inject constructor(
     companion object {
         private const val KEY_RAZORPAY_TOKEN = "key_razorpay_token"
         private const val KEY_AUTH_TOKEN = "key_auth_token"
+        private const val KEY_AUTH_JWT = "auth_jwt"
         private const val KEY_USER_ID = "key_user_id"
         private const val KEY_AUTO_TOPUP_ENABLED = "key_auto_topup_enabled"
         private const val KEY_AUTO_TOPUP_THRESHOLD = "key_auto_topup_threshold"
@@ -50,6 +51,8 @@ class EncryptedPrefsManager @Inject constructor(
         private const val KEY_IS_ROOTED = "key_is_rooted"
         private const val KEY_ONBOARDING_COMPLETE = "key_onboarding_complete"
         private const val KEY_FCM_TOKEN = "key_fcm_token"
+        private const val KEY_GOOGLE_DISPLAY_NAME = "google_display_name"
+        private const val KEY_GOOGLE_EMAIL = "google_email"
     }
 
     /**
@@ -120,6 +123,65 @@ class EncryptedPrefsManager @Inject constructor(
      */
     fun getAuthToken(): String? {
         return sharedPreferences.getString(KEY_AUTH_TOKEN, null)
+    }
+
+    /**
+     * Saves the authenticated user JWT token securely under key "auth_jwt".
+     * Why: Required specifically under key "auth_jwt" by the Google Sign-in requirements.
+     */
+    fun saveAuthJwt(token: String?) {
+        sharedPreferences.edit().putString(KEY_AUTH_JWT, token).apply()
+    }
+
+    /**
+     * Retrieves the authenticated user JWT token from key "auth_jwt".
+     * Why: Required specifically under key "auth_jwt" by the Google Sign-in requirements.
+     */
+    fun getAuthJwt(): String? {
+        return sharedPreferences.getString(KEY_AUTH_JWT, null)
+    }
+
+    /**
+     * Saves the user's Google display name securely.
+     */
+    fun saveGoogleDisplayName(name: String?) {
+        sharedPreferences.edit().putString(KEY_GOOGLE_DISPLAY_NAME, name).apply()
+    }
+
+    /**
+     * Retrieves the user's Google display name.
+     */
+    fun getGoogleDisplayName(): String? {
+        return sharedPreferences.getString(KEY_GOOGLE_DISPLAY_NAME, null)
+    }
+
+    /**
+     * Saves the user's Google email securely.
+     */
+    fun saveGoogleEmail(email: String?) {
+        sharedPreferences.edit().putString(KEY_GOOGLE_EMAIL, email).apply()
+    }
+
+    /**
+     * Retrieves the user's Google email.
+     */
+    fun getGoogleEmail(): String? {
+        return sharedPreferences.getString(KEY_GOOGLE_EMAIL, null)
+    }
+
+    /**
+     * Clears all authentication-related preferences.
+     * Why: Clears credentials on sign out.
+     */
+    fun clearAuth() {
+        sharedPreferences.edit()
+            .remove(KEY_AUTH_JWT)
+            .remove(KEY_AUTH_TOKEN)
+            .remove(KEY_USER_ID)
+            .remove(KEY_GOOGLE_DISPLAY_NAME)
+            .remove(KEY_GOOGLE_EMAIL)
+            .remove(KEY_ONBOARDING_COMPLETE)
+            .apply()
     }
 
     /**

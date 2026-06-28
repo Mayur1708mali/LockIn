@@ -1,20 +1,24 @@
 /*
- * File: com/lockin/app/feature/onboarding/OnboardingViewModel.kt
+ * File: app/src/main/java/com/lockin/app/feature/onboarding/OnboardingViewModel.kt
  * Purpose: ViewModel for the Onboarding screen flow.
- * Coordinates user onboarding steps, permissions states, deposit processing, and auto top-up config.
+ * Coordinates user onboarding steps, Google authentication, permissions states, deposit processing, and auto top-up config.
  */
 
 package com.lockin.app.feature.onboarding
 
 import android.app.Activity
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lockin.app.core.data.payment.RazorpayManager
 import com.lockin.app.core.domain.model.AutoTopUpConfig
 import com.lockin.app.core.domain.model.TransactionType
+import com.lockin.app.core.domain.model.WalletTransaction
 import com.lockin.app.core.domain.usecase.DepositToWalletUseCase
 import com.lockin.app.core.domain.usecase.SaveAutoTopUpConfigUseCase
+import com.lockin.app.core.domain.usecase.SignInWithGoogleUseCase
 import com.lockin.app.core.security.EncryptedPrefsManager
+import com.lockin.app.feature.auth.GoogleSignInManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,7 +31,10 @@ import javax.inject.Inject
 /**
  * UI State for the Onboarding screen flow.
  *
- * @param currentStep The current step index (1-7).
+ * @param currentStep The current step index (0-7). Step 0 is Google Sign-in.
+ * @param isGoogleSignInLoading Spinner state for Google authentication.
+ * @param isGoogleSignInSuccess Success flag for Google authentication.
+ * @param googleSignInError Description of Google sign-in failure.
  * @param isVpnPermissionGranted State representing if local VPN permission is granted.
  * @param isNotificationPermissionGranted State representing if notification permission is granted.
  * @param depositAmountPaise The chosen initial wallet deposit size.
@@ -40,7 +47,10 @@ import javax.inject.Inject
  * @param isCompleted Marks if final step is finished to proceed to main dashboard.
  */
 data class OnboardingUiState(
-    val currentStep: Int = 1,
+    val currentStep: Int = 0, // Starts at Step 0 for Google Sign-In
+    val isGoogleSignInLoading: Boolean = false,
+    val isGoogleSignInSuccess: Boolean = false,
+    val googleSignInError: String? = null,
     val isVpnPermissionGranted: Boolean = false,
     val isNotificationPermissionGranted: Boolean = false,
     val depositAmountPaise: Int = 10000, // Default ₹100 = 10000 Paise
@@ -54,18 +64,71 @@ data class OnboardingUiState(
 )
 
 /**
- * ViewModel to track and coordinate user inputs and setup throughout the 7 onboarding steps.
+ * ViewModel to track and coordinate user inputs and setup throughout the 8 onboarding steps (0-7).
  */
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     private val encryptedPrefsManager: EncryptedPrefsManager,
     private val saveAutoTopUpConfigUseCase: SaveAutoTopUpConfigUseCase,
     private val depositToWalletUseCase: DepositToWalletUseCase,
-    private val razorpayManager: RazorpayManager
+    private val razorpayManager: RazorpayManager,
+    private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
+    private val googleSignInManager: GoogleSignInManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
+
+    /**
+     * Attempts Google Sign-In using Credential Manager and verifies credentials with the backend.
+     * Why: Authenticates the user securely before granting wallet or session setup.
+     *
+     * @param activityContext Must be the activity context required to present Google dialogs.
+     */
+    fun signInWithGoogle(activityContext: Context) {
+        _uiState.update { it.copy(isGoogleSignInLoading = true, googleSignInError = null) }
+        viewModelScope.launch {
+            val credentialResult = googleSignInManager.signIn(activityContext)
+            credentialResult.fold(
+                onSuccess = { idToken ->
+                    // Verify Google ID token against backend /auth/google endpoint
+                    val verificationResult = signInWithGoogleUseCase(idToken)
+                    verificationResult.fold(
+                        onSuccess = { response ->
+                            Timber.d("Google Sign-In succeeded for user ID: ${response.userId}")
+                            _uiState.update {
+                                it.copy(
+                                    isGoogleSignInLoading = false,
+                                    isGoogleSignInSuccess = true,
+                                    currentStep = 1 // Progress directly to concept screen (Step 1)
+                                )
+                            }
+                        },
+                        onFailure = { error ->
+                            val errorMsg = error.localizedMessage ?: "Backend verification failed"
+                            Timber.e(error, "Google Sign-In backend verification failed.")
+                            _uiState.update {
+                                it.copy(
+                                    isGoogleSignInLoading = false,
+                                    googleSignInError = errorMsg
+                                )
+                            }
+                        }
+                    )
+                },
+                onFailure = { error ->
+                    val errorMsg = error.localizedMessage ?: "Google Sign-In failed"
+                    Timber.e(error, "Google Sign-In authentication failed.")
+                    _uiState.update {
+                        it.copy(
+                            isGoogleSignInLoading = false,
+                            googleSignInError = errorMsg
+                        )
+                    }
+                }
+            )
+        }
+    }
 
     /**
      * Increments the onboarding step up to the maximum step limit (7).
@@ -83,6 +146,7 @@ class OnboardingViewModel @Inject constructor(
 
     /**
      * Decrements the onboarding step down to step 1.
+     * Why: Users can navigate backward down to Step 1 but are not permitted to go back to the Sign-In gate (Step 0) once authenticated.
      */
     fun previousStep() {
         _uiState.update { state ->
