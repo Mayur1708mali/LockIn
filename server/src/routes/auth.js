@@ -126,4 +126,7 @@ router.post('/google', async (req, res, next) => {
       message: 'Authentication failed. Invalid Google ID token.',
       error: err.message
     });
+  }
+});
+
 export default router;
