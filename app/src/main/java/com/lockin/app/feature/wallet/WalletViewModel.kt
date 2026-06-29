@@ -237,7 +237,7 @@ class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 depositAmountPaise = amountPaise,
-                isDepositProcessing = true,
+                isDepositProcessing = false,
                 depositError = null,
                 depositSuccess = false
             )
