@@ -46,6 +46,17 @@ jobs:
           echo "RAZORPAY_KEY_LIVE=${{ secrets.RAZORPAY_KEY_LIVE }}" >> local.properties
           echo "BASE_URL=${{ secrets.BASE_URL }}" >> local.properties
 
+      # 4.5. Create google-services.json (Phase 1)
+      - name: Create google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" > app/google-services.json
+          else
+            echo '{"project_info":{"project_number":"123","project_id":"mock-id","storage_bucket":"mock.app"},"client":[{"client_info":{"mobilesdk_app_id":"1:123:android:123","android_client_info":{"package_name":"com.lockin.app"}},"oauth_client":[],"api_key":[{"current_key":"mock_key"}],"services":{}}]}' > app/google-services.json
+          fi
+
       # 5. Execute all local JVM unit tests (Phase 21.1, 21.2)
       - name: Run Unit Tests
         run: ./gradlew :app:testDebugUnitTest
@@ -103,3 +114,4 @@ jobs:
         run: |
           rm -f app/release-key.jks
           rm -f local.properties
+          rm -f app/google-services.json
