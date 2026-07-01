@@ -8,5 +8,6 @@ data class SessionEvent(
     val sessionId: String,
     val eventType: String, // HEARTBEAT, VPN_GAP, BREAK_ATTEMPT, BREAK_CONFIRMED, COMPLETED
     val timestamp: Long,
-    val metadata: String?
+    val metadata: String?,
+    val isSynced: Boolean = false
 )

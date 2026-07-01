@@ -17,5 +17,6 @@ data class WalletTransactionEntity(
     val direction: String, // "CREDIT" or "DEBIT"
     val sessionId: String?,
     val description: String,
-    val timestamp: Long
+    val timestamp: Long,
+    val isSynced: Boolean = false
 )

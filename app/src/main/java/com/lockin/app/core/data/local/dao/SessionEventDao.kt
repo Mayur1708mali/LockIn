@@ -24,4 +24,16 @@ interface SessionEventDao {
      */
     @Query("SELECT * FROM session_events WHERE sessionId = :sessionId ORDER BY timestamp ASC")
     suspend fun getEventsForSession(sessionId: String): List<SessionEventEntity>
+
+    /**
+     * Retrieves all events that are currently not synchronized with the backend.
+     */
+    @Query("SELECT * FROM session_events WHERE isSynced = 0")
+    suspend fun getUnsyncedEvents(): List<SessionEventEntity>
+
+    /**
+     * Marks a session event as synchronized with the backend.
+     */
+    @Query("UPDATE session_events SET isSynced = 1 WHERE eventId = :eventId")
+    suspend fun markEventSynced(eventId: String): Int
 }

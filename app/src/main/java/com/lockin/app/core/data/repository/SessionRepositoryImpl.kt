@@ -168,4 +168,20 @@ class SessionRepositoryImpl @Inject constructor(
             false
         }
     }
+
+    override suspend fun getUnsyncedSessions(): List<Session> {
+        return sessionDao.getUnsyncedSessions().map { it.toDomain() }
+    }
+
+    override suspend fun getUnsyncedEvents(): List<SessionEvent> {
+        return sessionEventDao.getUnsyncedEvents().map { it.toDomain() }
+    }
+
+    override suspend fun markSessionSynced(sessionId: String) {
+        sessionDao.markSessionSynced(sessionId)
+    }
+
+    override suspend fun markEventSynced(eventId: String) {
+        sessionEventDao.markEventSynced(eventId)
+    }
 }

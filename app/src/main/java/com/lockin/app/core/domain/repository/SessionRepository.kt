@@ -89,4 +89,24 @@ interface SessionRepository {
         newTotalPenaltiesPaid: Int,
         brokenEvent: SessionEvent
     ): Boolean
+
+    /**
+     * Retrieves all sessions that are currently not synchronized with the backend.
+     */
+    suspend fun getUnsyncedSessions(): List<Session>
+
+    /**
+     * Retrieves all events that are currently not synchronized with the backend.
+     */
+    suspend fun getUnsyncedEvents(): List<SessionEvent>
+
+    /**
+     * Marks a session as synchronized with the backend.
+     */
+    suspend fun markSessionSynced(sessionId: String)
+
+    /**
+     * Marks a session event as synchronized with the backend.
+     */
+    suspend fun markEventSynced(eventId: String)
 }

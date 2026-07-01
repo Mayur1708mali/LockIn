@@ -27,7 +27,7 @@ import com.lockin.app.core.data.local.entity.AllowedAppEntity
         WalletTransactionEntity::class,
         AllowedAppEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(LockInTypeConverters::class)

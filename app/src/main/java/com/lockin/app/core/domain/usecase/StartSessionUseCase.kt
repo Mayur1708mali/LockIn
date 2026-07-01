@@ -1,11 +1,14 @@
 package com.lockin.app.core.domain.usecase
 
+import com.lockin.app.core.data.remote.api.SessionApi
+import com.lockin.app.core.data.remote.dto.SessionCreateRequest
 import com.lockin.app.core.domain.model.Session
 import com.lockin.app.core.domain.model.SessionStatus
 import com.lockin.app.core.domain.model.TransactionType
 import com.lockin.app.core.domain.model.WalletTransaction
 import com.lockin.app.core.domain.repository.SessionRepository
 import com.lockin.app.core.domain.repository.WalletRepository
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
@@ -15,7 +18,8 @@ import javax.inject.Inject
  */
 class StartSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
-    private val walletRepository: WalletRepository
+    private val walletRepository: WalletRepository,
+    private val sessionApi: SessionApi
 ) {
 
     /**
@@ -54,6 +58,23 @@ class StartSessionUseCase @Inject constructor(
         val sessionId = UUID.randomUUID().toString()
         val txHoldId = UUID.randomUUID().toString()
 
+        var initiallySynced = false
+        try {
+            sessionApi.createSession(
+                SessionCreateRequest(
+                    sessionId = sessionId,
+                    penaltyAmount = penaltyAmount,
+                    startTime = now,
+                    targetEndTime = targetEndTime,
+                    allowlistVersion = allowlistVersion
+                )
+            )
+            initiallySynced = true
+        } catch (e: Exception) {
+            Timber.e(e, "Error creating session on remote server. Failing start session.")
+            return Result.failure(Exception("Cannot start session: Backend connection failed. Details: ${e.message}"))
+        }
+
         val newSession = Session(
             sessionId = sessionId,
             userId = userId,
@@ -63,7 +84,8 @@ class StartSessionUseCase @Inject constructor(
             actualEndTime = null,
             penaltyAmount = penaltyAmount,
             walletTxHoldId = txHoldId,
-            allowlistVersion = allowlistVersion
+            allowlistVersion = allowlistVersion,
+            isSynced = initiallySynced
         )
 
         val holdTransaction = WalletTransaction(
@@ -74,7 +96,8 @@ class StartSessionUseCase @Inject constructor(
             direction = "DEBIT",
             sessionId = sessionId,
             description = "Hold penalty amount for active session",
-            timestamp = now
+            timestamp = now,
+            isSynced = initiallySynced
         )
 
         val newAvailable = wallet.availableBalance - penaltyAmount

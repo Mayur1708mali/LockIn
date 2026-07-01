@@ -84,4 +84,14 @@ interface WalletRepository {
      * Counts transactions of a specific type since a given timestamp.
      */
     suspend fun getTransactionCountByTypeSince(type: TransactionType, sinceTimestamp: Long): Int
+
+    /**
+     * Retrieves all transactions that are currently not synchronized with the backend.
+     */
+    suspend fun getUnsyncedTransactions(): List<WalletTransaction>
+
+    /**
+     * Marks a wallet transaction as synchronized with the backend.
+     */
+    suspend fun markTransactionSynced(txId: String)
 }

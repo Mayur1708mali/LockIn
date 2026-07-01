@@ -26,7 +26,8 @@ fun SessionEntity.toDomain(): Session = Session(
     currency = currency,
     walletTxHoldId = walletTxHoldId,
     allowlistVersion = allowlistVersion,
-    platform = platform
+    platform = platform,
+    isSynced = isSynced
 )
 
 /**
@@ -43,7 +44,8 @@ fun Session.toEntity(): SessionEntity = SessionEntity(
     currency = currency,
     walletTxHoldId = walletTxHoldId,
     allowlistVersion = allowlistVersion,
-    platform = platform
+    platform = platform,
+    isSynced = isSynced
 )
 
 /**
@@ -54,7 +56,8 @@ fun SessionEventEntity.toDomain(): SessionEvent = SessionEvent(
     sessionId = sessionId,
     eventType = eventType,
     timestamp = timestamp,
-    metadata = metadata
+    metadata = metadata,
+    isSynced = isSynced
 )
 
 /**
@@ -65,7 +68,8 @@ fun SessionEvent.toEntity(): SessionEventEntity = SessionEventEntity(
     sessionId = sessionId,
     eventType = eventType,
     timestamp = timestamp,
-    metadata = metadata
+    metadata = metadata,
+    isSynced = isSynced
 )
 
 /**
@@ -109,7 +113,8 @@ fun WalletTransactionEntity.toDomain(): WalletTransaction = WalletTransaction(
     direction = direction,
     sessionId = sessionId,
     description = description,
-    timestamp = timestamp
+    timestamp = timestamp,
+    isSynced = isSynced
 )
 
 /**
@@ -123,7 +128,8 @@ fun WalletTransaction.toEntity(): WalletTransactionEntity = WalletTransactionEnt
     direction = direction,
     sessionId = sessionId,
     description = description,
-    timestamp = timestamp
+    timestamp = timestamp,
+    isSynced = isSynced
 )
 
 /**

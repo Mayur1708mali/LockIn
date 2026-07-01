@@ -1,5 +1,7 @@
 package com.lockin.app.core.domain.usecase
 
+import com.lockin.app.core.data.remote.api.SessionApi
+import com.lockin.app.core.data.remote.dto.SessionUpdateRequest
 import com.lockin.app.core.domain.model.Session
 import com.lockin.app.core.domain.model.SessionEvent
 import com.lockin.app.core.domain.model.SessionStatus
@@ -7,6 +9,7 @@ import com.lockin.app.core.domain.model.TransactionType
 import com.lockin.app.core.domain.model.WalletTransaction
 import com.lockin.app.core.domain.repository.SessionRepository
 import com.lockin.app.core.domain.repository.WalletRepository
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
@@ -16,7 +19,8 @@ import javax.inject.Inject
  */
 class CompleteSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
-    private val walletRepository: WalletRepository
+    private val walletRepository: WalletRepository,
+    private val sessionApi: SessionApi
 ) {
 
     /**
@@ -53,7 +57,8 @@ class CompleteSessionUseCase @Inject constructor(
             direction = "CREDIT",
             sessionId = activeSession.sessionId,
             description = "Release held penalty amount upon session completion",
-            timestamp = now
+            timestamp = now,
+            isSynced = false
         )
 
         val eventId = UUID.randomUUID().toString()
@@ -62,7 +67,8 @@ class CompleteSessionUseCase @Inject constructor(
             sessionId = activeSession.sessionId,
             eventType = "COMPLETED",
             timestamp = now,
-            metadata = "Session completed successfully. Released: ₹${activeSession.penaltyAmount / 100}"
+            metadata = "Session completed successfully. Released: ₹${activeSession.penaltyAmount / 100}",
+            isSynced = false
         )
 
         val newAvailable = wallet.availableBalance + activeSession.penaltyAmount
@@ -78,6 +84,23 @@ class CompleteSessionUseCase @Inject constructor(
         )
 
         return if (success) {
+            // Attempt to sync the session completion to the server immediately (Request 1)
+            try {
+                sessionApi.updateSession(
+                    sessionId = completedSession.sessionId,
+                    request = SessionUpdateRequest(
+                        status = "COMPLETED",
+                        actualEndTime = now
+                    )
+                )
+                // Mark session, release transaction, and completion event as synced in local DB (Request 1 & 2)
+                sessionRepository.markSessionSynced(completedSession.sessionId)
+                walletRepository.markTransactionSynced(releaseTransaction.txId)
+                sessionRepository.markEventSynced(completedEvent.eventId)
+                Timber.d("Successfully synced completed session to server database.")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to sync completed session to server. Will retry later.")
+            }
             Result.success(completedSession)
         } else {
             Result.failure(IllegalStateException("Database error executing complete session transaction"))

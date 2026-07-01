@@ -56,4 +56,16 @@ interface SessionDao {
      */
     @Query("SELECT * FROM sessions WHERE status = :activeStatus LIMIT 1")
     suspend fun getActiveSession(activeStatus: SessionStatus = SessionStatus.ACTIVE): SessionEntity?
+
+    /**
+     * Retrieves all sessions that are currently not synchronized with the backend.
+     */
+    @Query("SELECT * FROM sessions WHERE isSynced = 0")
+    suspend fun getUnsyncedSessions(): List<SessionEntity>
+
+    /**
+     * Marks a session as synchronized with the backend.
+     */
+    @Query("UPDATE sessions SET isSynced = 1 WHERE sessionId = :sessionId")
+    suspend fun markSessionSynced(sessionId: String): Int
 }

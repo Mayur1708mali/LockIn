@@ -177,4 +177,12 @@ class WalletRepositoryImpl @Inject constructor(
     override suspend fun getTransactionCountByTypeSince(type: TransactionType, sinceTimestamp: Long): Int {
         return walletTransactionDao.getTransactionCountByTypeSince(type, sinceTimestamp)
     }
+
+    override suspend fun getUnsyncedTransactions(): List<WalletTransaction> {
+        return walletTransactionDao.getUnsyncedTransactions().map { it.toDomain() }
+    }
+
+    override suspend fun markTransactionSynced(txId: String) {
+        walletTransactionDao.markTransactionSynced(txId)
+    }
 }

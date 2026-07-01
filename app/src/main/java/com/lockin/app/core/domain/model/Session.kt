@@ -14,5 +14,6 @@ data class Session(
     val currency: String = "INR",
     val walletTxHoldId: String? = null,
     val allowlistVersion: Int,
-    val platform: String = "android"
+    val platform: String = "android",
+    val isSynced: Boolean = false
 )

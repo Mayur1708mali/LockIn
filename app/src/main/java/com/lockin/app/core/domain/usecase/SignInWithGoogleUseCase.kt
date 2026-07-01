@@ -104,7 +104,8 @@ class SignInWithGoogleUseCase @Inject constructor(
                             currency = dto.currency,
                             walletTxHoldId = dto.walletTxHoldId,
                             allowlistVersion = dto.allowlistVersion,
-                            platform = dto.platform
+                            platform = dto.platform,
+                            isSynced = true
                         )
                     }
                     sessionRepository.insertSessions(sessions)
@@ -125,7 +126,8 @@ class SignInWithGoogleUseCase @Inject constructor(
                             direction = dto.direction,
                             sessionId = dto.sessionId,
                             description = dto.description,
-                            timestamp = dto.timestamp
+                            timestamp = dto.timestamp,
+                            isSynced = true
                         )
                     }
                     walletRepository.insertTransactions(transactions)

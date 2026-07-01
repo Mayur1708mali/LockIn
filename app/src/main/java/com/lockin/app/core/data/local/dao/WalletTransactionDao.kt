@@ -44,4 +44,16 @@ interface WalletTransactionDao {
      */
     @Query("SELECT COUNT(*) FROM wallet_transactions WHERE type = :type AND timestamp >= :sinceTimestamp")
     suspend fun getTransactionCountByTypeSince(type: TransactionType, sinceTimestamp: Long): Int
+
+    /**
+     * Retrieves all transactions that are currently not synchronized with the backend.
+     */
+    @Query("SELECT * FROM wallet_transactions WHERE isSynced = 0")
+    suspend fun getUnsyncedTransactions(): List<WalletTransactionEntity>
+
+    /**
+     * Marks a wallet transaction as synchronized with the backend.
+     */
+    @Query("UPDATE wallet_transactions SET isSynced = 1 WHERE txId = :txId")
+    suspend fun markTransactionSynced(txId: String): Int
 }

@@ -1,8 +1,11 @@
 package com.lockin.app.core.domain.usecase
 
+import com.lockin.app.core.data.remote.api.WalletApi
+import com.lockin.app.core.data.remote.dto.WithdrawRequest
 import com.lockin.app.core.domain.model.TransactionType
 import com.lockin.app.core.domain.model.WalletTransaction
 import com.lockin.app.core.domain.repository.WalletRepository
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 
@@ -11,7 +14,8 @@ import javax.inject.Inject
  * Validates balance requirements and initiates a manual bank withdrawal request.
  */
 class WithdrawFromWalletUseCase @Inject constructor(
-    private val walletRepository: WalletRepository
+    private val walletRepository: WalletRepository,
+    private val walletApi: WalletApi
 ) {
 
     /**
@@ -39,6 +43,15 @@ class WithdrawFromWalletUseCase @Inject constructor(
         val now = System.currentTimeMillis()
         val txId = UUID.randomUUID().toString()
 
+        var initiallySynced = false
+        try {
+            walletApi.withdraw(WithdrawRequest(amount = amountPaise))
+            initiallySynced = true
+            Timber.d("Successfully synced withdrawal request on remote server.")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to sync withdrawal request to server. Will retry later.")
+        }
+
         val withdrawalTransaction = WalletTransaction(
             txId = txId,
             userId = userId,
@@ -47,7 +60,8 @@ class WithdrawFromWalletUseCase @Inject constructor(
             direction = "DEBIT",
             sessionId = null,
             description = "Manual Withdrawal to Bank (3-5 days processing)",
-            timestamp = now
+            timestamp = now,
+            isSynced = initiallySynced
         )
 
         val success = walletRepository.withdrawTransaction(

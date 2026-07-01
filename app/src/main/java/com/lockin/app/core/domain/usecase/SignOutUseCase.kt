@@ -10,6 +10,7 @@ import com.lockin.app.core.security.EncryptedPrefsManager
 import com.lockin.app.feature.auth.GoogleSignInManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -19,7 +20,8 @@ import javax.inject.Inject
 class SignOutUseCase @Inject constructor(
     private val encryptedPrefsManager: EncryptedPrefsManager,
     private val lockInDatabase: LockInDatabase,
-    private val googleSignInManager: GoogleSignInManager
+    private val googleSignInManager: GoogleSignInManager,
+    private val syncUseCase: SyncUseCase
 ) {
 
     /**
@@ -28,6 +30,14 @@ class SignOutUseCase @Inject constructor(
      */
     suspend operator fun invoke() {
         withContext(Dispatchers.IO) {
+            // 0. Sync all unsynced local data to server database before clearing tables (Request 3)
+            try {
+                syncUseCase()
+                Timber.d("Sync before sign-out completed successfully.")
+            } catch (e: Exception) {
+                Timber.e(e, "Sync before sign-out failed.")
+            }
+
             // 1. Reset user identifier, auth tokens, display name, email, and onboarding completion
             encryptedPrefsManager.clearAuth()
 

@@ -1,6 +1,7 @@
 package com.lockin.app.core.domain.usecase
 
-import com.lockin.app.core.data.payment.RazorpayManager
+import com.lockin.app.core.data.remote.api.WalletApi
+import com.lockin.app.core.data.remote.dto.AutoTopUpRequest
 import com.lockin.app.core.domain.model.TransactionType
 import com.lockin.app.core.domain.repository.SessionRepository
 import com.lockin.app.core.domain.repository.WalletRepository
@@ -19,7 +20,7 @@ class AutoTopUpUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val depositToWalletUseCase: DepositToWalletUseCase,
     private val encryptedPrefsManager: EncryptedPrefsManager,
-    private val razorpayManager: RazorpayManager
+    private val walletApi: WalletApi
 ) {
 
     /**
@@ -75,24 +76,24 @@ class AutoTopUpUseCase @Inject constructor(
             return Result.failure(IllegalStateException("Daily auto top-up limit (3) reached"))
         }
 
-        // 6. Charge token (silently in background)
-        val token = encryptedPrefsManager.getToken()
-            ?: return Result.failure(IllegalStateException("No saved payment instrument token found for auto top-up"))
-
-        val chargeResult = razorpayManager.chargeToken(userId, wallet.autoTopUpAmountPaise, token)
-        if (chargeResult.isFailure) {
-            return Result.failure(Exception("Silent token charge payment gateway error: ${chargeResult.exceptionOrNull()?.message}"))
+        // 6. Execute auto top-up silent payment charge server-side (Request 2)
+        try {
+            walletApi.autoTopUp(AutoTopUpRequest(amount = wallet.autoTopUpAmountPaise))
+            Timber.i("Server-side silent token charge succeeded for auto top-up.")
+        } catch (e: Exception) {
+            Timber.e(e, "Silent token charge server error during auto top-up.")
+            return Result.failure(Exception("Silent token charge payment gateway error: ${e.message}"))
         }
 
         val paymentTxId = "pay_auto_" + UUID.randomUUID().toString().replace("-", "").take(14)
-        Timber.i("Silent token charge succeeded. Payment ID: %s", paymentTxId)
 
-        // 7. Deposit the top-up amount to wallet and log AUTO_TOPUP transaction
+        // 7. Deposit the top-up amount to wallet and log AUTO_TOPUP transaction locally as pre-synced (Request 2)
         val depositResult = depositToWalletUseCase(
             userId = userId,
             amountPaise = wallet.autoTopUpAmountPaise,
             transactionType = TransactionType.AUTO_TOPUP,
-            razorpayPaymentId = paymentTxId
+            razorpayPaymentId = paymentTxId,
+            isSynced = true
         )
 
         return depositResult
