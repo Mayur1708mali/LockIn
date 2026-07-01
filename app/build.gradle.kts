@@ -152,6 +152,7 @@ dependencies {
 
   // Hilt WorkManager Integration
   implementation(libs.androidx.hilt.work)
+  implementation(libs.androidx.hilt.navigation.compose)
   ksp(libs.androidx.hilt.compiler)
 
   // Google Credentials & Identity for Google Sign-in

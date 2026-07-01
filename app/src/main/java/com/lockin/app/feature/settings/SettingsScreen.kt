@@ -59,7 +59,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.core.domain.model.AllowedApp
 import com.lockin.app.ui.components.LockInButton
 import com.lockin.app.ui.components.LockInTextField
@@ -78,7 +78,7 @@ import java.util.Locale
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    viewModel: SettingsViewModel = viewModel()
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? Activity

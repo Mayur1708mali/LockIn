@@ -47,7 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.core.domain.model.SessionStatus
 import com.lockin.app.service.LockInVpnService
 import com.lockin.app.service.SessionWatchdog
@@ -104,18 +104,13 @@ fun BreakGateScreen(
     penaltyAmountPaise: Int,
     onSessionFinished: (sessionId: String, status: SessionStatus) -> Unit,
     onNavigateBack: () -> Unit,
-    viewModel: BreakGateViewModel = viewModel()
+    viewModel: BreakGateViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? FragmentActivity
     val uiState by viewModel.uiState.collectAsState()
 
-    // 1. Initialize viewmodel values on launch
-    LaunchedEffect(sessionId, penaltyAmountPaise) {
-        viewModel.initSession(sessionId, penaltyAmountPaise)
-    }
-
-    // 2. Observe break completion and clean up VPN locks before exiting
+    // 1. Observe break completion and clean up VPN locks before exiting
     LaunchedEffect(uiState.isBreakSuccess) {
         if (uiState.isBreakSuccess) {
             Timber.i("BreakGateScreen: Session broken early. Stopping VPN service.")
@@ -133,6 +128,11 @@ fun BreakGateScreen(
         }
     }
 
+    // 2. Initialize viewmodel values on launch
+    LaunchedEffect(sessionId, penaltyAmountPaise) {
+        viewModel.initSession(sessionId, penaltyAmountPaise)
+    }
+
     // 3. Auto-trigger biometric prompt on step transition (Phase 11.4)
     LaunchedEffect(uiState.currentStep) {
         if (uiState.currentStep == BreakStep.BIOMETRIC && activity != null) {
@@ -146,77 +146,112 @@ fun BreakGateScreen(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFF0D0D0D) // Enforce background #0D0D0D
     ) { innerPadding ->
-        Box(
+        BreakGateScreenContent(
+            uiState = uiState,
+            onMoveToBiometric = { viewModel.moveToBiometric() },
+            onTriggerBiometric = { activity?.let { viewModel.triggerBiometricPrompt(it) } },
+            onSimulateBiometric = { viewModel.onBiometricSuccess() },
+            onUpdateConfirmationText = { viewModel.updateConfirmationText(it) },
+            onConfirmBreak = { viewModel.confirmBreak() },
+            onCancel = {
+                if (uiState.currentStep == BreakStep.BIOMETRIC) {
+                    viewModel.onBiometricFailureOrCancel("User cancelled verification")
+                } else {
+                    onNavigateBack()
+                }
+            },
+            modifier = Modifier.padding(innerPadding),
+            isBiometricAvailable = viewModel.isBiometricAvailable(),
+            activity = activity
+        )
+    }
+}
+
+/**
+ * Testable content wrapper for the Break Gate screen.
+ * Exposes pure state callbacks to enable robust Compose UI test coverage without Hilt injections.
+ */
+@Composable
+fun BreakGateScreenContent(
+    uiState: BreakGateUiState,
+    onMoveToBiometric: () -> Unit,
+    onTriggerBiometric: () -> Unit,
+    onSimulateBiometric: () -> Unit,
+    onUpdateConfirmationText: (String) -> Unit,
+    onConfirmBreak: () -> Unit,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier,
+    isBiometricAvailable: Boolean = false,
+    activity: FragmentActivity? = null
+) {
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Monospace setup header
-                SectionHeader(
-                    label = "DETOX BREAK ATTEMPT",
-                    title = "EARLY BREAK GATE"
-                )
+            // Monospace setup header
+            SectionHeader(
+                label = "DETOX BREAK ATTEMPT",
+                title = "EARLY BREAK GATE"
+            )
 
-                Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-                // Error message display
-                if (uiState.error != null) {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFF3B30).copy(alpha = 0.1f)),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, Color(0xFFFF3B30), RoundedCornerShape(8.dp))
-                            .padding(bottom = 24.dp)
-                    ) {
-                        Text(
-                            text = uiState.error!!,
-                            color = Color(0xFFFF3B30),
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+            // Error message display
+            if (uiState.error != null) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFF3B30).copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Color(0xFFFF3B30), RoundedCornerShape(8.dp))
+                        .padding(bottom = 24.dp)
+                ) {
+                    Text(
+                        text = uiState.error,
+                        color = Color(0xFFFF3B30),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
                 }
+            }
 
-                // Render current step layout
-                when (uiState.currentStep) {
-                    BreakStep.WARNING -> {
-                        StepWarningLayout(
-                            penaltyAmountPaise = uiState.penaltyAmountPaise,
-                            secondsLeft = uiState.warningSecondsLeft,
-                            onProceed = { viewModel.moveToBiometric() },
-                            onCancel = onNavigateBack
-                        )
-                    }
-                    BreakStep.BIOMETRIC -> {
-                        StepBiometricLayout(
-                            activity = activity,
-                            penaltyAmountPaise = uiState.penaltyAmountPaise,
-                            isBiometricAvailable = viewModel.isBiometricAvailable(),
-                            onTriggerPrompt = { activity?.let { viewModel.triggerBiometricPrompt(it) } },
-                            onSimulateSuccess = { viewModel.onBiometricSuccess() },
-                            onCancel = { viewModel.onBiometricFailureOrCancel("User cancelled verification") }
-                        )
-                    }
-                    BreakStep.CONFIRMATION -> {
-                        StepConfirmationLayout(
-                            penaltyAmountPaise = uiState.penaltyAmountPaise,
-                            confirmationText = uiState.confirmationText,
-                            isBreaking = uiState.isBreaking,
-                            onTextChange = { viewModel.updateConfirmationText(it) },
-                            onConfirm = { viewModel.confirmBreak() },
-                            onCancel = onNavigateBack
-                        )
-                    }
+            // Render current step layout
+            when (uiState.currentStep) {
+                BreakStep.WARNING -> {
+                    StepWarningLayout(
+                        penaltyAmountPaise = uiState.penaltyAmountPaise,
+                        secondsLeft = uiState.warningSecondsLeft,
+                        onProceed = onMoveToBiometric,
+                        onCancel = onCancel
+                    )
+                }
+                BreakStep.BIOMETRIC -> {
+                    StepBiometricLayout(
+                        activity = activity,
+                        penaltyAmountPaise = uiState.penaltyAmountPaise,
+                        isBiometricAvailable = isBiometricAvailable,
+                        onTriggerPrompt = onTriggerBiometric,
+                        onSimulateSuccess = onSimulateBiometric,
+                        onCancel = onCancel
+                    )
+                }
+                BreakStep.CONFIRMATION -> {
+                    StepConfirmationLayout(
+                        penaltyAmountPaise = uiState.penaltyAmountPaise,
+                        confirmationText = uiState.confirmationText,
+                        isBreaking = uiState.isBreaking,
+                        onTextChange = onUpdateConfirmationText,
+                        onConfirm = onConfirmBreak,
+                        onCancel = onCancel
+                    )
                 }
             }
         }

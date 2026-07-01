@@ -45,6 +45,7 @@ import javax.inject.Inject
  * @param autoTopUpThresholdPaise Threshold value under which Auto Top-Up charges are fired.
  * @param autoTopUpAmountPaise Custom size of Auto Top-Up charge transactions.
  * @param isCompleted Marks if final step is finished to proceed to main dashboard.
+ * @param isExistingUser True if the user profile already exists in the system database.
  */
 data class OnboardingUiState(
     val currentStep: Int = 0, // Starts at Step 0 for Google Sign-In
@@ -60,7 +61,8 @@ data class OnboardingUiState(
     val autoTopUpEnabled: Boolean = true,
     val autoTopUpThresholdPaise: Int = 20000, // Default ₹200
     val autoTopUpAmountPaise: Int = 50000, // Default ₹500
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val isExistingUser: Boolean = false
 )
 
 /**
@@ -97,13 +99,13 @@ class OnboardingViewModel @Inject constructor(
                         onSuccess = { response ->
                             Timber.d("Google Sign-In succeeded for user ID: ${response.userId}, isExistingUser: ${response.isExistingUser}")
                             if (response.isExistingUser) {
-                                // Existing user: mark onboarding as complete and skip setup steps
-                                encryptedPrefsManager.saveOnboardingComplete(true)
+                                // Existing user: show first 5 onboarding screens (Step 0 to Step 4)
                                 _uiState.update {
                                     it.copy(
                                         isGoogleSignInLoading = false,
                                         isGoogleSignInSuccess = true,
-                                        isCompleted = true
+                                        isExistingUser = true,
+                                        currentStep = 1 // Progress to concept screen (Step 1)
                                     )
                                 }
                             } else {
@@ -112,6 +114,7 @@ class OnboardingViewModel @Inject constructor(
                                     it.copy(
                                         isGoogleSignInLoading = false,
                                         isGoogleSignInSuccess = true,
+                                        isExistingUser = false,
                                         currentStep = 1 // Progress directly to concept screen (Step 1)
                                     )
                                 }
@@ -145,14 +148,41 @@ class OnboardingViewModel @Inject constructor(
 
     /**
      * Increments the onboarding step up to the maximum step limit (7).
+     * If the user is an existing user and they completed Step 4 (the 5th screen), we finish onboarding.
      */
     fun nextStep() {
+        val currentState = _uiState.value
+        if (currentState.isExistingUser && currentState.currentStep == 4) {
+            completeOnboardingForExistingUser()
+            return
+        }
         _uiState.update { state ->
             val next = state.currentStep + 1
             if (next <= 7) {
                 state.copy(currentStep = next)
             } else {
                 state
+            }
+        }
+    }
+
+    /**
+     * Completes the onboarding walkthrough for existing users, persisting the completion flag,
+     * and setting [OnboardingUiState.isCompleted] to trigger Home screen navigation.
+     * Why: Prevents existing users from being forced to fund or top-up their wallets again.
+     */
+    private fun completeOnboardingForExistingUser() {
+        viewModelScope.launch {
+            try {
+                // Persist onboarding completion status (Task 7.10)
+                encryptedPrefsManager.saveOnboardingComplete(true)
+                Timber.d("Onboarding completed for existing user after showing the first 5 onboarding screens.")
+                _uiState.update { it.copy(isCompleted = true) }
+            } catch (e: Exception) {
+                Timber.e(e, "Error completing onboarding for existing user.")
+                // Fail-safe: complete onboarding to prevent trapping user
+                encryptedPrefsManager.saveOnboardingComplete(true)
+                _uiState.update { it.copy(isCompleted = true) }
             }
         }
     }

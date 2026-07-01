@@ -60,7 +60,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.core.domain.model.TransactionType
 import com.lockin.app.core.domain.model.Wallet
 import com.lockin.app.core.domain.model.WalletTransaction
@@ -88,7 +88,7 @@ fun WalletScreen(
     openWithdrawalSheet: Boolean = false,
     onNavigateBack: () -> Unit,
     onNavigateHome: () -> Unit,
-    viewModel: WalletViewModel = viewModel()
+    viewModel: WalletViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? FragmentActivity

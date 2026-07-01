@@ -9,9 +9,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.lockin.app.core.domain.model.AutoTopUpConfig
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.assertTrue
 
 class OnboardingUiTest {
 
@@ -28,15 +28,9 @@ class OnboardingUiTest {
         val initialUiState = OnboardingUiState(
             currentStep = OnboardingStep.WELCOME,
             isDepositProcessing = false,
-            depositSuccess = false,
+            isDepositSuccess = false,
             depositError = null,
-            depositAmountPaise = 50000, // ₹500 default initial fund
-            autoTopUpConfig = AutoTopUpConfig(
-                autoTopUpEnabled = true,
-                autoTopUpThresholdPaise = 10000,
-                autoTopUpAmountPaise = 20000,
-                savedPaymentMethodLabel = null
-            )
+            depositAmountPaise = 50000
         )
 
         composeTestRule.setContent {
@@ -66,10 +60,9 @@ class OnboardingUiTest {
         val rulesState = OnboardingUiState(
             currentStep = OnboardingStep.RULES,
             isDepositProcessing = false,
-            depositSuccess = false,
+            isDepositSuccess = false,
             depositError = null,
-            depositAmountPaise = 50000,
-            autoTopUpConfig = AutoTopUpConfig(true, 10000, 20000, null)
+            depositAmountPaise = 50000
         )
 
         composeTestRule.setContent {
@@ -99,10 +92,9 @@ class OnboardingUiTest {
         val vpnState = OnboardingUiState(
             currentStep = OnboardingStep.VPN_PERMISSION,
             isDepositProcessing = false,
-            depositSuccess = false,
+            isDepositSuccess = false,
             depositError = null,
-            depositAmountPaise = 50000,
-            autoTopUpConfig = AutoTopUpConfig(true, 10000, 20000, null)
+            depositAmountPaise = 50000
         )
 
         var vpnClicked = false
@@ -136,10 +128,9 @@ class OnboardingUiTest {
         val notificationsState = OnboardingUiState(
             currentStep = OnboardingStep.NOTIFICATION_PERMISSION,
             isDepositProcessing = false,
-            depositSuccess = false,
+            isDepositSuccess = false,
             depositError = null,
-            depositAmountPaise = 50000,
-            autoTopUpConfig = AutoTopUpConfig(true, 10000, 20000, null)
+            depositAmountPaise = 50000
         )
 
         var notificationClicked = false
@@ -173,4 +164,11 @@ class OnboardingUiTest {
         composeTestRule.onNodeWithText("Skip For Now").performClick()
         assertTrue(notificationSkipped)
     }
+}
+
+object OnboardingStep {
+    const val WELCOME = 1
+    const val RULES = 2
+    const val VPN_PERMISSION = 3
+    const val NOTIFICATION_PERMISSION = 4
 }

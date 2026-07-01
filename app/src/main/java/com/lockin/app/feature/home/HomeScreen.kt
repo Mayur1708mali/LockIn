@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.ui.components.LoadingOverlay
 import com.lockin.app.ui.components.LockInButton
 import com.lockin.app.ui.components.SectionHeader
@@ -104,7 +104,7 @@ fun HomeScreen(
     onNavigateToWallet: () -> Unit,
     onNavigateToAccount: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

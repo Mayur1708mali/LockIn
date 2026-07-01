@@ -17,7 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import com.lockin.app.feature.home.HomeScreen
 import com.lockin.app.feature.onboarding.OnboardingScreen
 import com.lockin.app.feature.session.ActiveSessionScreen
@@ -32,8 +34,9 @@ import timber.log.Timber
 /**
  * Renders the Navigation display for LockIn based on the current back stack.
  * Maps each serialized [LockInRoute] to its screen UI.
- * Integrates Google Sign-In as Step 0 of Onboarding and supports global redirection upon sign out/session expiration.
- * Temporary placeholder screens are supplied so the app compiles while UI screens are being built.
+ * Integrates entry decorators (SaveableStateHolderNavEntryDecorator and ViewModelStoreNavEntryDecorator)
+ * to ensure that each navigation destination has its own correctly scoped ViewModelStore,
+ * which is automatically cleared when the entry is popped from the back stack.
  *
  * @param backStack The Navigation 3 back stack tracking current destination state.
  */
@@ -53,6 +56,10 @@ fun LockInNavGraph(
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
         entryProvider = entryProvider<NavKey> {
             entry<LockInRoute.Onboarding> {
                 OnboardingScreen(
@@ -181,6 +188,7 @@ fun LockInNavGraph(
 
 /**
  * Composable displaying a centered placeholder message.
+ * Why: Used as a fallback or design blueprint when other screen templates are incomplete.
  *
  * @param message The text to display.
  */

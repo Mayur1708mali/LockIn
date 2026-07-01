@@ -17,7 +17,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -59,7 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.ui.components.LockInButton
 import com.lockin.app.ui.components.LoadingOverlay
 import com.lockin.app.ui.components.SectionHeader
@@ -76,7 +76,7 @@ import timber.log.Timber
 fun OnboardingScreen(
     onComplete: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: OnboardingViewModel = viewModel()
+    viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
@@ -111,6 +111,75 @@ fun OnboardingScreen(
         viewModel.nextStep()
     }
 
+    OnboardingScreenContent(
+        uiState = uiState,
+        onSignInClick = { viewModel.signInWithGoogle(context) },
+        onNextStep = { viewModel.nextStep() },
+        onBackStep = { viewModel.previousStep() },
+        onGrantVpn = {
+            val intent = VpnService.prepare(context)
+            if (intent != null) {
+                vpnLauncher.launch(intent)
+            } else {
+                viewModel.setVpnPermissionGranted(true)
+                viewModel.nextStep()
+            }
+        },
+        onGrantNotifications = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                viewModel.setNotificationPermissionGranted(true)
+                viewModel.nextStep()
+            }
+        },
+        onSkipNotifications = {
+            viewModel.setNotificationPermissionGranted(false)
+            viewModel.nextStep()
+        },
+        onInitiateDeposit = {
+            activity?.let { viewModel.startDeposit(it) }
+        },
+        onSimulateDepositSuccess = { paymentId ->
+            viewModel.handleDepositSuccess(paymentId)
+        },
+        onToggleAutoTopUp = { viewModel.toggleAutoTopUp(it) },
+        onSelectThreshold = { viewModel.updateAutoTopUpThreshold(it) },
+        onSelectAmount = { viewModel.updateAutoTopUpAmount(it) },
+        onConfirmConfig = { viewModel.nextStep() },
+        onCompleteOnboarding = { viewModel.saveAutoTopUpConfigAndComplete() },
+        modifier = modifier,
+        activity = activity
+    )
+
+    // Global loading overlay during deposit update execution or Google authentication
+    LoadingOverlay(isLoading = uiState.isDepositProcessing || uiState.isGoogleSignInLoading)
+}
+
+/**
+ * Pure, state-driven representation of the onboarding flow wizard.
+ * Allows isolation UI tests without needing Hilt-injected ViewModels.
+ */
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun OnboardingScreenContent(
+    uiState: OnboardingUiState,
+    onNextStep: () -> Unit,
+    onBackStep: () -> Unit,
+    onGrantVpn: () -> Unit,
+    onGrantNotifications: () -> Unit,
+    onSkipNotifications: () -> Unit,
+    onInitiateDeposit: () -> Unit,
+    onSimulateDepositSuccess: (String) -> Unit,
+    onToggleAutoTopUp: (Boolean) -> Unit,
+    onSelectThreshold: (Int) -> Unit,
+    onSelectAmount: (Int) -> Unit,
+    onConfirmConfig: () -> Unit,
+    onCompleteOnboarding: () -> Unit,
+    modifier: Modifier = Modifier,
+    activity: Activity? = null,
+    onSignInClick: () -> Unit = {}
+) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -122,7 +191,10 @@ fun OnboardingScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // 1. Progress indicators at the top (covers steps 0-7)
-            OnboardingProgressIndicator(currentStep = uiState.currentStep)
+            OnboardingProgressIndicator(
+                currentStep = uiState.currentStep,
+                isExistingUser = uiState.isExistingUser
+            )
 
             // 2. Animated step content switcher
             Box(
@@ -134,80 +206,56 @@ fun OnboardingScreen(
                 AnimatedContent(
                     targetState = uiState.currentStep,
                     transitionSpec = {
-                        fadeIn() with fadeOut()
+                        fadeIn() togetherWith fadeOut()
                     }
                 ) { step ->
                     when (step) {
                         0 -> StepGoogleSignIn(
                             uiState = uiState,
-                            onSignInClick = { viewModel.signInWithGoogle(context) }
+                            onSignInClick = onSignInClick
                         )
-                        1 -> StepConcept(onNext = { viewModel.nextStep() })
-                        2 -> StepWalletExplainer(onNext = { viewModel.nextStep() })
+                        1 -> StepConcept(onNext = onNextStep)
+                        2 -> StepWalletExplainer(onNext = onNextStep)
                         3 -> StepVpnPermission(
-                            context = context,
-                            onGrant = {
-                                val intent = VpnService.prepare(context)
-                                if (intent != null) {
-                                    vpnLauncher.launch(intent)
-                                } else {
-                                    viewModel.setVpnPermissionGranted(true)
-                                    viewModel.nextStep()
-                                }
-                            }
+                            context = LocalContext.current,
+                            onGrant = onGrantVpn
                         )
                         4 -> StepNotificationPermission(
-                            onGrant = {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                } else {
-                                    viewModel.setNotificationPermissionGranted(true)
-                                    viewModel.nextStep()
-                                }
-                            },
-                            onSkip = {
-                                viewModel.setNotificationPermissionGranted(false)
-                                viewModel.nextStep()
-                            }
+                            onGrant = onGrantNotifications,
+                            onSkip = onSkipNotifications
                         )
                         5 -> StepFirstDeposit(
                             uiState = uiState,
-                            onAmountSelected = { viewModel.updateDepositAmount(it) },
-                            onInitiateDeposit = {
-                                activity?.let { viewModel.startDeposit(it) }
-                            },
-                            onSuccessMock = { paymentId -> viewModel.handleDepositSuccess(paymentId) },
-                            onFailureMock = { error -> viewModel.handleDepositFailure(error) }
+                            onAmountSelected = onSelectAmount,
+                            onInitiateDeposit = onInitiateDeposit,
+                            onSuccessMock = onSimulateDepositSuccess,
+                            onFailureMock = { /* noop */ }
                         )
                         6 -> StepAutoTopUpConfig(
                             uiState = uiState,
-                            onToggle = { viewModel.toggleAutoTopUp(it) },
-                            onThresholdSelected = { viewModel.updateAutoTopUpThreshold(it) },
-                            onAmountSelected = { viewModel.updateAutoTopUpAmount(it) },
-                            onConfirm = { viewModel.nextStep() }
+                            onToggle = onToggleAutoTopUp,
+                            onThresholdSelected = onSelectThreshold,
+                            onAmountSelected = onSelectAmount,
+                            onConfirm = onConfirmConfig
                         )
                         7 -> StepReady(
                             uiState = uiState,
-                            onComplete = { viewModel.saveAutoTopUpConfigAndComplete() }
+                            onComplete = onCompleteOnboarding
                         )
                     }
                 }
             }
 
             // 3. Back navigation button at the bottom fold
-            // Stops at Step 1, preventing user from returning to Google Sign-In screen (Step 0) once authenticated
             if (uiState.currentStep in 2..6 && uiState.currentStep != 5) {
                 LockInButton(
                     text = "Back",
-                    onClick = { viewModel.previousStep() },
+                    onClick = onBackStep,
                     isSecondary = true,
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }
         }
-
-        // Global loading overlay during deposit update execution or Google authentication
-        LoadingOverlay(isLoading = uiState.isDepositProcessing || uiState.isGoogleSignInLoading)
     }
 }
 
@@ -217,8 +265,10 @@ fun OnboardingScreen(
 @Composable
 private fun OnboardingProgressIndicator(
     currentStep: Int,
+    isExistingUser: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val totalSteps = if (isExistingUser) 5 else 8
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -226,7 +276,7 @@ private fun OnboardingProgressIndicator(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        for (i in 0..7) {
+        for (i in 0 until totalSteps) {
             Box(
                 modifier = Modifier
                     .size(if (i == currentStep) 10.dp else 6.dp)
@@ -235,7 +285,7 @@ private fun OnboardingProgressIndicator(
                         if (i == currentStep) Color(0xFFFF3B30) else Color(0xFF48484A)
                     )
             )
-            if (i < 7) {
+            if (i < totalSteps - 1) {
                 Spacer(modifier = Modifier.width(12.dp))
             }
         }

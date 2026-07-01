@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.core.domain.model.SessionStatus
 import com.lockin.app.service.LockInVpnService
 import com.lockin.app.service.SessionWatchdog
@@ -62,7 +62,7 @@ fun ActiveSessionScreen(
     sessionId: String,
     onNavigateToBreakGate: (sessionId: String, penaltyAmountPaise: Int) -> Unit,
     onSessionFinished: (sessionId: String, status: SessionStatus) -> Unit,
-    viewModel: SessionViewModel = viewModel()
+    viewModel: SessionViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()

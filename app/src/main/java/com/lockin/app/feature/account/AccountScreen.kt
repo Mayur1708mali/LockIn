@@ -55,7 +55,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.R
 import com.lockin.app.ui.components.LoadingOverlay
 import java.util.Locale
@@ -100,7 +100,7 @@ private val ArrowBackIcon: ImageVector
 fun AccountScreen(
     onNavigateBack: () -> Unit,
     onSignOutComplete: () -> Unit,
-    viewModel: AccountViewModel = viewModel()
+    viewModel: AccountViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val signOutState by viewModel.signOutState.collectAsState()

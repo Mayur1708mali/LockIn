@@ -53,7 +53,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lockin.app.core.domain.model.Session
 import com.lockin.app.core.domain.model.SessionEvent
 import com.lockin.app.core.domain.model.SessionStatus
@@ -77,7 +77,7 @@ import java.util.TimeZone
 @Composable
 fun HistoryScreen(
     onNavigateBack: () -> Unit,
-    viewModel: HistoryViewModel = viewModel()
+    viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedEvents by viewModel.selectedSessionEvents.collectAsState()
