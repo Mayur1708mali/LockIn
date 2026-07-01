@@ -60,8 +60,14 @@ class DepositToWalletUseCase @Inject constructor(
                 )
                 finalSynced = true
                 Timber.d("Successfully synced manual deposit transaction to server.")
+            } catch (e: retrofit2.HttpException) {
+                val code = e.code()
+                Timber.e(e, "Failed to sync manual deposit: Server rejected transaction with HTTP $code.")
+                if (code in 400..499) {
+                    return Result.failure(e)
+                }
             } catch (e: Exception) {
-                Timber.e(e, "Failed to sync manual deposit to server. Will retry later.")
+                Timber.e(e, "Temporary connection error syncing deposit. Will retry syncing later in the background.")
             }
         }
 
